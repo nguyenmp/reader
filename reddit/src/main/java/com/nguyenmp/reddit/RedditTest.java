@@ -13,7 +13,7 @@ public class RedditTest {
     }
 
     @Test
-    public void testOAuthConstructor() {
+    public void testReconstructor() {
         Reddit reddit = new Reddit(null);
         assertNotNull(reddit);
     }
