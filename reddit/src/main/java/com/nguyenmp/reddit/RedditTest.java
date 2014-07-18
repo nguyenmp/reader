@@ -1,34 +1,18 @@
 package com.nguyenmp.reddit;
 
+import com.nguyenmp.reddit.data.LoginData;
+
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class RedditTest {
 
     @Test
-    public void testNoArgsConstructor() {
-        Reddit reddit = new Reddit();
-        assertNotNull(reddit);
+    public void testLogin() throws Exception {
+        String username = "asdf", password = "fdsa";
+        LoginData login = Reddit.login(username, password);
+        assertNull(login);
     }
 
-    @Test
-    public void testReconstructor() {
-        Reddit reddit = new Reddit(null);
-        assertNotNull(reddit);
-    }
-
-    @Test
-    public void testCredentialsConstructor() throws Exception {
-        String username = "", password = "";
-        Reddit reddit = new Reddit(username, password);
-        assertNotNull(reddit);
-    }
-
-    @Test
-    public void testBadCredentialsConstructor() throws Exception {
-        String username = "", password = "";
-        Reddit reddit = new Reddit(username, password);
-        assertNotNull(reddit);
-    }
 }
