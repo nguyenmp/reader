@@ -14,14 +14,20 @@ public class RedditTest {
 
     @Test
     public void testOAuthConstructor() {
-        String oauth_token = null;
-        Reddit reddit = new Reddit(oauth_token);
+        Reddit reddit = new Reddit(null);
         assertNotNull(reddit);
     }
 
     @Test
-    public void testCredentialsConstructor() {
-        String username = null, password = null;
+    public void testCredentialsConstructor() throws Exception {
+        String username = "", password = "";
+        Reddit reddit = new Reddit(username, password);
+        assertNotNull(reddit);
+    }
+
+    @Test
+    public void testBadCredentialsConstructor() throws Exception {
+        String username = "", password = "";
         Reddit reddit = new Reddit(username, password);
         assertNotNull(reddit);
     }
