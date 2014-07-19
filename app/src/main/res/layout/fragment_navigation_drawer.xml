@@ -8,12 +8,49 @@
     android:background="#cccc"
     tools:context=".NavigationDrawerFragment" >
 
-    <ListView
+    <RelativeLayout
+        android:id="@+id/accounts_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="#f444">
+
+        <TextView
+            android:id="@+id/current_account_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMediumInverse"
+            android:paddingLeft="8dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@string/not_logged_in"/>
+
+        <ImageView
+            android:id="@+id/accounts_dropdown_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_navigation_expand_white" />
+
+        <ListView
+            android:id="@+id/accounts_list_view"
+            android:layout_below="@id/current_account_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:paddingLeft="8dp" />
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/subreddits_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/accounts_container"
+        android:layout_alignParentBottom="true"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
-        android:id="@+id/list"
         android:dividerHeight="0dp" />
 
 </RelativeLayout>

@@ -1,25 +1,30 @@
 package com.nguyenmp.reader;
 
-import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -87,11 +92,41 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_navigation_drawer, container);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final Context context = getActivity();
+        final View view = inflater.inflate(R.layout.fragment_navigation_drawer, container);
 
-        mDrawerListView = (ListView) view.findViewById(R.id.list);
+        // Set up the accounts stuff
+        final ListView accountsListView = (ListView) view.findViewById(R.id.accounts_list_view);
+        accountsListView.setAdapter(new ArrayAdapter<String>(
+                getActionBar().getThemedContext(),
+                android.R.layout.simple_list_item_1,
+                android.R.id.text1,
+                new String[]{
+                        "Account 1",
+                        "Account 2",
+                        "Account 3",
+                }));
+        final TextView currentAccountTextView = (TextView) view.findViewById(R.id.current_account_text_view);
+        final ImageView currentAccountDropdownIndicator = (ImageView) view.findViewById(R.id.accounts_dropdown_indicator);
+        currentAccountTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Animate the dropdown list
+                boolean isVisible = accountsListView.getVisibility() == View.VISIBLE;
+                accountsListView.setVisibility(isVisible ? View.GONE : View.VISIBLE);
+
+                // Animate the indicator
+                final int indicatorAnimationRes = isVisible ? R.anim.rotate_clockwise_180_360 : R.anim.rotate_clockwise_0_180;
+                final Animation indicatorAnimation = AnimationUtils.loadAnimation(context, indicatorAnimationRes);
+                indicatorAnimation.setFillEnabled(true);
+                indicatorAnimation.setFillAfter(true);
+                currentAccountDropdownIndicator.startAnimation(indicatorAnimation);
+            }
+        });
+
+        // Set up the subreddit stuff
+        mDrawerListView = (ListView) view.findViewById(R.id.subreddits_list_view);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
