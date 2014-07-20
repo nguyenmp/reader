@@ -27,7 +27,7 @@ public class SubredditLinkListingTest {
 
     @Test
     public void test2() throws Exception {
-        LoginData login = Reddit.login("markerz", "SHP39E1LLR87");
+        LoginData login = Reddit.login("584669", "584669");
         SubredditLinkListing listing = SubredditLinkListing.get(login);
         assertNotNull(listing);
         assertEquals(listing.getKind(), "Listing");

@@ -1,26 +1,18 @@
 package com.nguyenmp.reader;
 
-import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 
 public class FrontpageActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, Refreshable {
+
+    private static final String TAG_LISTING_FRAGMENT = "Listing Fragment";
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -52,7 +44,7 @@ public class FrontpageActivity extends ActionBarActivity
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, SubredditLinkListingFragment.newInstance())
+                .replace(R.id.container, SubredditLinkListingFragment.newInstance(), TAG_LISTING_FRAGMENT)
                 .commit();
     }
 
@@ -103,44 +95,19 @@ public class FrontpageActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+    @Override
+    public void refresh() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
+        // Refresh the drawer
+        NavigationDrawerFragment drawerFragment =
+                (NavigationDrawerFragment) fragmentManager.findFragmentById(R.id.navigation_drawer);
+        drawerFragment.refresh();
 
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_frontpage, container, false);
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((FrontpageActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
-        }
+        // Refresh subreddit viewing
+        SubredditLinkListingFragment listingFragment =
+                (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(TAG_LISTING_FRAGMENT);
+        listingFragment.refresh();
     }
 
 }

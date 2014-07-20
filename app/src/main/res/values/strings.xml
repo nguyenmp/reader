@@ -13,5 +13,8 @@
     <string name="add_account">Add Account</string>
     <string name="cancel">Cancel</string>
     <string name="not_logged_in">Not Logged In</string>
+    <string name="sign_in">Sign In</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
 
 </resources>
