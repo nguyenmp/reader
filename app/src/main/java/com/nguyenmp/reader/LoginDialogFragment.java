@@ -1,5 +1,6 @@
 package com.nguyenmp.reader;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -47,9 +49,8 @@ public class LoginDialogFragment extends DialogFragment {
         final AlertDialog dialog = builder.create();
 
         // Set the login and cancel button
-        LoginClickListener clickListener = null;
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.log_in), clickListener);
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel), clickListener);
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.log_in), (DialogInterface.OnClickListener) null);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel), (DialogInterface.OnClickListener) null);
 
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -58,7 +59,7 @@ public class LoginDialogFragment extends DialogFragment {
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        new LoginTask(context, username.getText().toString(), password.getText().toString()).execute();
+                        new LoginTask(context, username.getText().toString(), password.getText().toString(), LoginDialogFragment.this).execute();
                     }
                 });
                 dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
@@ -73,30 +74,24 @@ public class LoginDialogFragment extends DialogFragment {
     }
 
     public void enableFields() {
-        // TODO: Enable all fields when we need to
+        setEnabled(true);
     }
 
     public void disableFields() {
-        // TODO: Enable all fields when we need to
+        setEnabled(false);
     }
 
-    private static class LoginClickListener implements DialogInterface.OnClickListener {
-        private final FragmentActivity context;
-        private final EditText username, password;
+    public void setEnabled(boolean enabled) {
+        AlertDialog dialog = (AlertDialog) getDialog();
+        EditText username = (EditText) dialog.findViewById(R.id.username);
+        username.setEnabled(enabled);
+        EditText password = (EditText) dialog.findViewById(R.id.password);
+        password.setEnabled(enabled);
 
-        private LoginClickListener(FragmentActivity context, EditText username, EditText password) {
-            this.context = context;
-            this.username = username;
-            this.password = password;
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            if (which == DialogInterface.BUTTON_POSITIVE) {
-            } else {
-                dialog.dismiss();
-            }
-        }
+        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButton.setEnabled(enabled);
+        Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negativeButton.setEnabled(enabled);
     }
 
     private static class LoginTask extends AsyncTask<Void, Void, Account> {
@@ -104,12 +99,20 @@ public class LoginDialogFragment extends DialogFragment {
         private final Context context;
         private final String username, password;
         private String error = null;
+        private final LoginDialogFragment fragment;
 
-        private LoginTask(FragmentActivity context, String username, String password) {
+        private LoginTask(FragmentActivity context, String username, String password, LoginDialogFragment fragment) {
+            this.fragment = fragment;
             this.refreshListener = (Refreshable) context;
             this.context = context;
             this.username = username;
             this.password = password;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            fragment.disableFields();
         }
 
         @Override
@@ -124,8 +127,10 @@ public class LoginDialogFragment extends DialogFragment {
             }
         }
 
+        @SuppressLint("CommitPrefEdits")
         @Override
         protected void onPostExecute(Account account) {
+            fragment.enableFields();
             if (error != null) Toast.makeText(context, error,Toast.LENGTH_LONG).show();
             if (account == null) return;
             AccountsDatabase.put(context, account);
@@ -135,6 +140,7 @@ public class LoginDialogFragment extends DialogFragment {
                     .putString("cookie", account.data.cookie)
                     .putString("modhash", account.data.modhash)
                     .commit();
+            fragment.dismiss();
             refreshListener.refresh();
         }
     }
