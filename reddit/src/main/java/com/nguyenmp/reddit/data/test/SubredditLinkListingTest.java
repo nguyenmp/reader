@@ -38,4 +38,9 @@ public class SubredditLinkListingTest {
         assertNotNull(listingData.getModhash());
         assertEquals(listingData.getModhash(), "");
     }
+
+    @Test
+    public void test3() throws Exception {
+
+    }
 }
