@@ -16,5 +16,10 @@
     <string name="sign_in">Sign In</string>
     <string name="password">Password</string>
     <string name="username">Username</string>
+    <string name="Profile">Profile</string>
+    <string name="Messages">Messages</string>
+    <string name="Settings">Settings</string>
+    <string name="modify_accounts">Modify Accounts</string>
+    <string name="giant_snoo">Giant Snoo</string>
 
 </resources>

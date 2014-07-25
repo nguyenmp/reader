@@ -1,5 +1,6 @@
 package com.nguyenmp.reader;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -7,10 +8,17 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class FrontpageActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, Refreshable {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, Refreshable, ActionBar.OnNavigationListener {
 
     private static final String TAG_LISTING_FRAGMENT = "Listing Fragment";
 
@@ -64,9 +72,14 @@ public class FrontpageActivity extends ActionBarActivity
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        ArrayList<String> subreddits = new ArrayList<String>();
+        subreddits.add("Frontpage");
+        subreddits.add("All");
+        subreddits.add("Guilded");
+        SubredditsAdapter subredditsAdapter = new SubredditsAdapter(this, subreddits);
+        actionBar.setListNavigationCallbacks(subredditsAdapter, this);
     }
 
 
@@ -110,4 +123,41 @@ public class FrontpageActivity extends ActionBarActivity
         listingFragment.refresh();
     }
 
+    @Override
+    public boolean onNavigationItemSelected(int i, long l) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        SubredditLinkListingFragment listingFragment =
+                (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(TAG_LISTING_FRAGMENT);
+
+        // TODO: Swap listing for new subreddit
+
+        return true;
+    }
+
+    private static class SubredditsAdapter extends ArrayAdapter<String> {
+
+        public SubredditsAdapter(Context context, List<String> objects) {
+            super(context, android.R.layout.simple_spinner_dropdown_item, objects);
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            View view = super.getDropDownView(position, convertView, parent);
+
+            TextView textView = (TextView) view.findViewById(android.R.id.text1);
+            textView.setTextColor(view.getContext().getResources().getColor(android.R.color.white));
+
+            return view;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = super.getView(position, convertView, parent);
+
+            TextView textView = (TextView) view.findViewById(android.R.id.text1);
+            textView.setTextColor(view.getContext().getResources().getColor(android.R.color.white));
+
+            return view;
+        }
+    }
 }

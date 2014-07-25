@@ -15,6 +15,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,17 +26,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nguyenmp.reader.adapters.ChildAdapter;
 import com.nguyenmp.reader.data.Account;
 import com.nguyenmp.reader.db.AccountsDatabase;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -48,8 +46,6 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
      * Remember the position of the selected item.
      */
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
-
-    private static final String STATE_ACCOUNTS_VISIBILITY = "selected_accounts_visibility";
 
     /**
      * Per the design guidelines, you should show the drawer on launch until the user manually
@@ -68,7 +64,6 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private ListView mAccountsListView;
     private ListView mSubredditsListView;
     private TextView mCurrentAccountTextView;
     private View mFragmentContainerView;
@@ -107,32 +102,20 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedState) {
-        final FragmentActivity context = getActivity();
         final View view = inflater.inflate(R.layout.fragment_navigation_drawer, container);
 
         // Set up the accounts stuff
-        mAccountsListView = (ListView) view.findViewById(R.id.accounts_list_view);
-        AccountsAdapter adapter = new AccountsAdapter(context);
-        mAccountsListView.setAdapter(adapter);
-        mAccountsListView.setOnItemClickListener(new AccountsSelectionListener(context, adapter));
-        if (savedState != null) mAccountsListView.setVisibility(savedState.getInt(STATE_ACCOUNTS_VISIBILITY, View.GONE));
-        mCurrentAccountTextView = (TextView) view.findViewById(R.id.current_account_text_view);
+        final Account[] accounts = AccountsDatabase.get(view.getContext());
         final ImageView currentAccountDropdownIndicator = (ImageView) view.findViewById(R.id.accounts_dropdown_indicator);
-        mCurrentAccountTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Animate the dropdown list
-                boolean isVisible = mAccountsListView.getVisibility() == View.VISIBLE;
-                mAccountsListView.setVisibility(isVisible ? View.GONE : View.VISIBLE);
+        currentAccountDropdownIndicator.setOnClickListener(new ShowAccountsOnClickListener(getActivity(), accounts));
+        mCurrentAccountTextView = (TextView) view.findViewById(R.id.current_account_text_view);
 
-                // Animate the indicator
-                final int indicatorAnimationRes = isVisible ? R.anim.rotate_clockwise_180_360 : R.anim.rotate_clockwise_0_180;
-                final Animation indicatorAnimation = AnimationUtils.loadAnimation(context, indicatorAnimationRes);
-                indicatorAnimation.setFillEnabled(true);
-                indicatorAnimation.setFillAfter(true);
-                currentAccountDropdownIndicator.startAnimation(indicatorAnimation);
-            }
-        });
+        // If we are logged in, clicking the username will shoot you to the profile
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+        if (prefs.contains("username")) refresh();
+
+        // If we are not logged in, clicking the username will prompt accounts
+        else mCurrentAccountTextView.setOnClickListener(new ShowAccountsOnClickListener(getActivity(), currentAccountDropdownIndicator, accounts));
 
         // Set up the subreddit stuff
         mSubredditsListView = (ListView) view.findViewById(R.id.subreddits_list_view);
@@ -267,7 +250,6 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
-        if (mAccountsListView != null) outState.putInt(STATE_ACCOUNTS_VISIBILITY, mAccountsListView.getVisibility());
     }
 
     @Override
@@ -327,69 +309,6 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
         void onNavigationDrawerItemSelected(int position);
     }
 
-    private static class AccountsAdapter extends BaseAdapter {
-        private final Context context;
-        private final List<Account> accounts = new ArrayList<Account>();
-
-        private AccountsAdapter(Context context) {
-            this.context = context;
-            this.notifyDataSetChanged();
-        }
-
-        @Override
-        public int getCount() {
-            return accounts.size() + 2;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            if (position < accounts.size()) return accounts.get(position);
-            else return null;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View view, ViewGroup parent) {
-            // Initialize view if it's not being recycled
-            if (view == null) {
-                LayoutInflater inflater = LayoutInflater.from(context);
-                view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
-            }
-
-            String username;
-            if (position > accounts.size()) {
-                username = "Add Account";
-            } else if (position == accounts.size()) {
-                username = "Not Logged In";
-            } else {
-                username = accounts.get(position).username;
-            }
-
-            TextView textView = (TextView) view.findViewById(android.R.id.text1);
-            textView.setText(username);
-            textView.setTextColor(context.getResources().getColorStateList(android.R.color.primary_text_dark));
-
-            return view;
-        }
-
-        @Override
-        public void notifyDataSetChanged() {
-            // Refresh list of accounts from the database
-            accounts.clear();
-            accounts.addAll(AccountsDatabase.get(context));
-
-            super.notifyDataSetChanged();
-        }
-
-        public Account[] getAccounts() {
-            return accounts.toArray(new Account[accounts.size()]);
-        }
-    }
-
     @Override
     public void refresh() {
         Context context = getActivity();
@@ -398,28 +317,67 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
         // Refresh current account
         String currentAccount = PreferenceManager.getDefaultSharedPreferences(context).getString("username", "Not Logged In");
         if (mCurrentAccountTextView != null) mCurrentAccountTextView.setText(currentAccount);
-
-        // Refresh accounts
-        AccountsAdapter adapter = (AccountsAdapter) mAccountsListView.getAdapter();
-        if (adapter != null) adapter.notifyDataSetInvalidated();
     }
 
-    private static class AccountsSelectionListener implements AdapterView.OnItemClickListener {
-        private final AccountsAdapter adapter;
-        private final FragmentActivity activity;
+    /** Shows a list of accounts/actions and animates the views */
+    private static class ShowAccountsOnClickListener implements View.OnClickListener {
+        private final FragmentActivity fragmentActivity;
+        private final View dropdownIndicator;
+        private final Account[] accounts;
 
-        private AccountsSelectionListener(FragmentActivity activity, AccountsAdapter adapter) {
-            this.adapter = adapter;
-            this.activity = activity;
+        /** Creates a listener that will animate the clicked view */
+        private ShowAccountsOnClickListener(FragmentActivity fragmentActivity, Account[] accounts) {
+            this.fragmentActivity = fragmentActivity;
+            this.accounts = accounts;
+            this.dropdownIndicator = null;
+        }
+
+        /** Creates a listener that will animate the given view */
+        private ShowAccountsOnClickListener(FragmentActivity fragmentActivity, View dropdownIndicator, Account[] accounts) {
+            this.fragmentActivity = fragmentActivity;
+            this.dropdownIndicator = dropdownIndicator;
+            this.accounts = accounts;
         }
 
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Account[] accounts = adapter.getAccounts();
+        public void onClick(View v) {
+            // Show the dropdown list
+            PopupMenu accountsMenu = new PopupMenu(v.getContext(), v);
+            Menu menu = accountsMenu.getMenu();
+            int order = 0;
+            for (Account account : accounts) menu.add(Menu.NONE, Menu.NONE, order++, account.username);
+            menu.add(Menu.NONE, Menu.NONE, order++, "Anonymous");
+            menu.add(Menu.NONE, Menu.NONE, order, "Add An Account");
+            accountsMenu.show();
+            accountsMenu.setOnMenuItemClickListener(new AccountsSelectionListener(v.getContext(), fragmentActivity, accounts));
+
+            // Animate the indicator
+            View target = dropdownIndicator != null ? dropdownIndicator : v;
+            final int indicatorAnimationRes = R.anim.grow;
+            final Animation indicatorAnimation = AnimationUtils.loadAnimation(v.getContext(), indicatorAnimationRes);
+            target.startAnimation(indicatorAnimation);
+        }
+    }
+
+    private static class AccountsSelectionListener implements PopupMenu.OnMenuItemClickListener {
+        private final Context context;
+        private final FragmentActivity fragmentActivity;
+        private final Account[] accounts;
+
+        private AccountsSelectionListener(Context context, FragmentActivity fragmentActivity, Account[] accounts) {
+            this.context = context;
+            this.fragmentActivity = fragmentActivity;
+            this.accounts = accounts;
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            int position = menuItem.getOrder();
+
             // If the item selected is in the list of accounts, use that
             if (position < accounts.length) {
                 Account account = accounts[position];
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 prefs.edit()
                         .putString("username", account.username)
                         .putString("cookie", account.data.cookie)
@@ -429,7 +387,7 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
 
             // Otherwise, it's either anonymous
             else if (position == accounts.length) {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 prefs.edit()
                         .remove("username")
                         .remove("cookie")
@@ -440,10 +398,45 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
             // Otherwise, it's a login attempt
             else {
                 DialogFragment dialog = LoginDialogFragment.newInstance();
-                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
                 dialog.show(fragmentManager, "Login Dialog");
             }
+
+            return true;
         }
     }
 
+    private static class SettingsAdapter extends ChildAdapter {
+        // TODO: Implement SettingsAdapter
+        private final Context mContext;
+
+        private SettingsAdapter(Context context, boolean loggedIn) {
+            this.mContext = context;
+        }
+
+        @Override
+        public int getCount() {
+            return 0;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return null;
+        }
+
+        @Override
+        public void refresh() {
+
+        }
+    }
 }

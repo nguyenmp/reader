@@ -47,7 +47,7 @@ public class AccountsDatabase extends SQLiteOpenHelper{
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public static List<Account> get(Context context) {
+    public static Account[] get(Context context) {
         // These are the query arguments
         String table = AccountEntry.TABLE_NAME;
         String[] columns = null; // All columns
@@ -78,7 +78,7 @@ public class AccountsDatabase extends SQLiteOpenHelper{
         database.close();
 
         // Return the generated list of accounts from the DB
-        return accounts;
+        return accounts.toArray(new Account[accounts.size()]);
     }
 
     public static void put(Context context, Account account) {
