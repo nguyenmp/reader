@@ -25,16 +25,14 @@
             android:scaleType="centerCrop"
             android:src="@drawable/giant_snoo_25" />
 
-        <TextView
-            android:id="@+id/current_account_text_view"
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/current_account_icon"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_below="@id/giant_snoo"
-            android:textAppearance="?android:attr/textAppearanceMediumInverse"
-            android:padding="16dp"
-            android:paddingLeft="8dp"
-            android:text="@string/not_logged_in"/>
+            android:padding="8dp"
+            android:contentDescription="@string/modify_accounts"
+            android:src="@drawable/ic_social_person" />
 
         <ImageView
             android:id="@+id/accounts_dropdown_indicator"
@@ -45,6 +43,19 @@
             android:padding="8dp"
             android:contentDescription="@string/modify_accounts"
             android:src="@drawable/ic_navigation_expand_white" />
+
+        <TextView
+            android:id="@+id/current_account_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/giant_snoo"
+            android:layout_toRightOf="@id/current_account_icon"
+            android:layout_toLeftOf="@id/accounts_dropdown_indicator"
+            android:textAppearance="?android:attr/textAppearanceMediumInverse"
+            android:ellipsize="end"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@string/not_logged_in"/>
 
     </RelativeLayout>
 
