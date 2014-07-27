@@ -111,6 +111,7 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
     }
 
     private static class ListAdapter extends BaseAdapter {
+        private static final int TYPE_SELF_POST = 0, TYPE_LINK = 1;
         private final ArrayList<Link> data = new ArrayList<Link>();
         private final Context context;
 
@@ -134,19 +135,29 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
         }
 
         @Override
+        public int getItemViewType(int position) {
+            return data.get(position).getData().isIs_self() ? TYPE_SELF_POST : TYPE_LINK;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 2;
+        }
+
+        @Override
         public View getView(int position, View view, ViewGroup parent) {
             // Inflate a new view if we cannot recycle an old one
             if (view == null) {
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
-                view = layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false);
+                view = layoutInflater.inflate(R.layout.list_item_link, parent, false);
             }
 
             Link link = getItem(position);
 
-            TextView text1 = (TextView) view.findViewById(android.R.id.text1);
+            TextView text1 = (TextView) view.findViewById(R.id.list_item_link_title);
             text1.setText(link.getData().getTitle());
 
-            TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+            TextView text2 = (TextView) view.findViewById(R.id.list_item_link_subtitle);
             text2.setText(link.getData().getSubreddit());
 
             return view;

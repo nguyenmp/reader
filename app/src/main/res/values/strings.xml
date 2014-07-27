@@ -21,5 +21,6 @@
     <string name="Settings">Settings</string>
     <string name="modify_accounts">Modify Accounts</string>
     <string name="giant_snoo">Giant Snoo</string>
+    <string name="thumbnail">Thumbnail</string>
 
 </resources>
