@@ -1,6 +1,5 @@
 package com.nguyenmp.reader;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -41,6 +40,7 @@ import com.nguyenmp.reader.db.AccountsDatabase;
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
 public class NavigationDrawerFragment extends Fragment implements Refreshable {
+    public static final String FRAGMENT_TAG = "navigation_drawer";
 
     /**
      * Remember the position of the selected item.
@@ -52,11 +52,6 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
      * expands it. This shared preference tracks this.
      */
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
-
-    /**
-     * A pointer to the current callbacks instance (the Activity).
-     */
-    private NavigationDrawerCallbacks mCallbacks;
 
     /**
      * Helper component that ties the action bar to the navigation drawer.
@@ -225,25 +220,11 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }
-        if (mCallbacks != null) {
-            mCallbacks.onNavigationDrawerItemSelected(position);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mCallbacks = null;
     }
 
     @Override
@@ -290,6 +271,7 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
      */
     private void showGlobalContextActionBar() {
         ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowCustomEnabled(false);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setTitle(R.string.app_name);
@@ -297,16 +279,6 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
 
     private ActionBar getActionBar() {
         return ((ActionBarActivity) getActivity()).getSupportActionBar();
-    }
-
-    /**
-     * Callbacks interface that all activities using this fragment must implement.
-     */
-    public static interface NavigationDrawerCallbacks {
-        /**
-         * Called when an item in the navigation drawer is selected.
-         */
-        void onNavigationDrawerItemSelected(int position);
     }
 
     @Override
@@ -402,6 +374,8 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
                 dialog.show(fragmentManager, "Login Dialog");
             }
 
+            // Refresh and say we handled this
+            ((Refreshable) fragmentActivity).refresh();
             return true;
         }
     }

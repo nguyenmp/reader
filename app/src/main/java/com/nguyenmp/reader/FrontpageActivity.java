@@ -1,36 +1,33 @@
 package com.nguyenmp.reader;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.nguyenmp.reader.dialogs.SubredditPickerDialog;
 
 public class FrontpageActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, Refreshable, ActionBar.OnNavigationListener {
+        implements Refreshable,
+        SubredditPickerDialog.Callback {
 
-    private static final String TAG_LISTING_FRAGMENT = "Listing Fragment";
+    private static final String FRAGMENT_TAG_SUBREDDIT_LISTING = "Listing Fragment";
+    private static final String FRAGMENT_TAG_POST = "Post";
+    private static final String STATE_SELECTED_SUBREDDIT = "state_selected_subreddit";
+
+    private String mSubreddit = null;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,47 +36,45 @@ public class FrontpageActivity extends ActionBarActivity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        if (savedInstanceState == null) getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, SubredditLinkListingFragment.newInstance(), FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, SubredditLinkListingFragment.newInstance(), TAG_LISTING_FRAGMENT)
-                .commit();
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(STATE_SELECTED_SUBREDDIT, mSubreddit);
     }
 
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-        }
+    @Override
+    protected void onRestoreInstanceState(Bundle inState) {
+        super.onRestoreInstanceState(inState);
+
+        mSubreddit = inState.getString(STATE_SELECTED_SUBREDDIT);
     }
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
+        View customTitleView = LayoutInflater.from(this).inflate(R.layout.subreddit_picker_view, null, false);
+        TextView titleView = (TextView) customTitleView.findViewById(R.id.title_input);
+        titleView.setText(mSubreddit == null ? "Frontpage Of The Internet" : mSubreddit);
+        actionBar.setCustomView(customTitleView);
+        actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        ArrayList<String> subreddits = new ArrayList<String>();
-        subreddits.add("Frontpage");
-        subreddits.add("All");
-        subreddits.add("Guilded");
-        SubredditsAdapter subredditsAdapter = new SubredditsAdapter(this, subreddits);
-        actionBar.setListNavigationCallbacks(subredditsAdapter, this);
+        actionBar.getCustomView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getSupportFragmentManager();
+                SubredditPickerDialog.newInstance().show(fm, "SubredditPicker");
+            }
+        });
     }
 
 
@@ -114,50 +109,46 @@ public class FrontpageActivity extends ActionBarActivity
 
         // Refresh the drawer
         NavigationDrawerFragment drawerFragment =
-                (NavigationDrawerFragment) fragmentManager.findFragmentById(R.id.navigation_drawer);
+                (NavigationDrawerFragment) fragmentManager.findFragmentByTag(NavigationDrawerFragment.FRAGMENT_TAG);
         drawerFragment.refresh();
 
         // Refresh subreddit viewing
         SubredditLinkListingFragment listingFragment =
-                (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(TAG_LISTING_FRAGMENT);
-        listingFragment.refresh();
+                (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+        if (listingFragment != null) listingFragment.refresh();
     }
 
     @Override
-    public boolean onNavigationItemSelected(int i, long l) {
+    public void onSubredditPicked(String subreddit) {
+        // If both past and future are null or equal, ignore the picked request
+        if (subreddit == null) {
+            if (mSubreddit == null) return;
+        } else if (subreddit.equals(mSubreddit)) return;
+
+        // Otherwise, the picked subreddit is new and different
+        mSubreddit = subreddit;
+
         FragmentManager fragmentManager = getSupportFragmentManager();
-        SubredditLinkListingFragment listingFragment =
-                (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(TAG_LISTING_FRAGMENT);
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        // TODO: Swap listing for new subreddit
+        // Remove the fragment that shows the post
+        SubredditLinkFragment postFragment = (SubredditLinkFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_POST);
+        if (postFragment != null) fragmentTransaction.remove(postFragment);
 
-        return true;
+        // Refresh subreddit viewing
+        SubredditLinkListingFragment subredditFragment = (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+        if (subredditFragment == null) {
+            subredditFragment = SubredditLinkListingFragment.newInstance(subreddit);
+            fragmentTransaction.replace(R.id.container, subredditFragment, FRAGMENT_TAG_SUBREDDIT_LISTING);
+        }
+        subredditFragment.setSubreddit(subreddit);
+        subredditFragment.refresh();
+
+        // Commit changes
+        fragmentTransaction.commit();
+
+        // Update actionbar for new subreddit
+        restoreActionBar();
     }
 
-    private static class SubredditsAdapter extends ArrayAdapter<String> {
-
-        public SubredditsAdapter(Context context, List<String> objects) {
-            super(context, android.R.layout.simple_spinner_dropdown_item, objects);
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            View view = super.getDropDownView(position, convertView, parent);
-
-            TextView textView = (TextView) view.findViewById(android.R.id.text1);
-            textView.setTextColor(view.getContext().getResources().getColor(android.R.color.white));
-
-            return view;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View view = super.getView(position, convertView, parent);
-
-            TextView textView = (TextView) view.findViewById(android.R.id.text1);
-            textView.setTextColor(view.getContext().getResources().getColor(android.R.color.white));
-
-            return view;
-        }
-    }
 }

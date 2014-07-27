@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,21 +18,18 @@ import com.nguyenmp.reddit.nio.SubredditLinkListingRunnable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SubredditLinkListingFragment extends ListFragment implements Refreshable {
+public class SubredditLinkFragment extends ListFragment implements Refreshable {
 
     /** Specifies the subreddit for this fragment to display the listing of.
      * If not specified, this Fragment will simply show the frontpage. */
     public static final String ARGUMENT_SUBREDDIT = "com.nguyenmp.reader.SubredditLinkListing.ARGUMENT_SUBREDDIT";
-    public static final String STATE_SUBREDDIT = "state_subreddit";
 
-    private String mSubreddit;
-
-    public static SubredditLinkListingFragment newInstance() {
-        return newInstance(null);
+    public static SubredditLinkFragment newInstance() {
+        return new SubredditLinkFragment();
     }
 
-    public static SubredditLinkListingFragment newInstance(String subreddit) {
-        SubredditLinkListingFragment fragment = new SubredditLinkListingFragment();
+    public static SubredditLinkFragment newInstance(String subreddit) {
+        SubredditLinkFragment fragment = new SubredditLinkFragment();
         Bundle arguments = new Bundle();
         arguments.putString(ARGUMENT_SUBREDDIT, subreddit);
         fragment.setArguments(arguments);
@@ -41,61 +37,34 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
     }
 
     @Override
-    public void onCreate(Bundle inState) {
-        super.onCreate(inState);
-        mSubreddit = getArguments().getString(ARGUMENT_SUBREDDIT);
-        if (inState != null) mSubreddit = inState.getString(STATE_SUBREDDIT);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putString(STATE_SUBREDDIT, mSubreddit);
-    }
-
-    public void setSubreddit(String subreddit) {
-        this.mSubreddit = subreddit;
-    }
-
-    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(new ListAdapter(getActivity()));
-        Log.d("Subreddits", "Saved state = " + savedInstanceState);
         refresh();
     }
 
     @Override
-    public ListAdapter getListAdapter() {
-        return (ListAdapter) super.getListAdapter();
-    }
-
-    @Override
     public void refresh() {
-        getListAdapter().clear();
-        setListShown(false);
         Activity activity = getActivity();
         if (activity != null) {
-            new FetchListingTask(mSubreddit, getListAdapter(), this).execute();
+            new FetchListingTask(null, (ListAdapter) getListAdapter()).execute();
         }
     }
 
     private static class FetchListingTask extends AsyncTask<Void, Void, SubredditLinkListing> {
         private final String subreddit;
         private final ListAdapter adapter;
-        private final ListFragment fragment;
 
-        private FetchListingTask(String subreddit, ListAdapter adapter, ListFragment fragment) {
+        private FetchListingTask(String subreddit, ListAdapter adapter) {
             this.subreddit = subreddit;
             this.adapter = adapter;
-            this.fragment = fragment;
         }
 
         @Override
         protected SubredditLinkListing doInBackground(Void... params) {
             try {
-                return new SubredditLinkListingRunnable(subreddit).runBlockingMode();
+                SubredditLinkListing result =  new SubredditLinkListingRunnable(subreddit).runBlockingMode();
+                return result;
             } catch (Exception e) {
                 return null;
             }
@@ -105,7 +74,6 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
         protected void onPostExecute(SubredditLinkListing subredditLinkListing) {
             if (subredditLinkListing != null) {
                 adapter.add(subredditLinkListing.getData().getChildren());
-                fragment.setListShown(true);
             }
         }
     }
@@ -154,11 +122,6 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
 
         public void add(Link... newData) {
             data.addAll(Arrays.asList(newData));
-            notifyDataSetChanged();
-        }
-
-        public void clear() {
-            data.clear();
             notifyDataSetChanged();
         }
     }
