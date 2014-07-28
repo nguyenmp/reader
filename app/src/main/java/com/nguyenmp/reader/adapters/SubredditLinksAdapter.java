@@ -16,9 +16,15 @@ import java.util.Arrays;
 public class SubredditLinksAdapter extends BaseAdapter {
     private final ArrayList<Link> data = new ArrayList<Link>();
     private final Context context;
+    private final Callback callback;
 
-    public SubredditLinksAdapter(Context context) {
+    public static interface Callback {
+        public void loadMore();
+    }
+
+    public SubredditLinksAdapter(Context context, Callback callback) {
         this.context = context;
+        this.callback = callback;
     }
 
     @Override
@@ -38,6 +44,9 @@ public class SubredditLinksAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
+        // Load more if we're showing the last view
+        if (position >= data.size() - 1 && callback != null) callback.loadMore();
+
         // Inflate a new view if we cannot recycle an old one
         if (view == null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);

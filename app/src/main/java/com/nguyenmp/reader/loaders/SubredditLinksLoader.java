@@ -19,9 +19,9 @@ public class SubredditLinksLoader extends AsyncTaskLoader<SubredditLinkListing> 
 
     @Override
     public SubredditLinkListing loadInBackground() {
-        Log.d("Testing", "Loading in background");
         try {
-            return new SubredditLinkListingRunnable(mSubreddit).runBlockingMode();
+            String after = mData == null ? null : mData.getData().getAfter();
+            return new SubredditLinkListingRunnable(mSubreddit, after).runBlockingMode();
         } catch (Exception e) {
             return null;
         }

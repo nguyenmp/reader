@@ -1,6 +1,5 @@
 package com.nguyenmp.reader;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -14,12 +13,16 @@ import com.nguyenmp.reddit.data.SubredditLinkListing;
 
 public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         implements Refreshable,
-        LoaderManager.LoaderCallbacks<SubredditLinkListing>, SwipeRefreshLayout.OnRefreshListener {
+        LoaderManager.LoaderCallbacks<SubredditLinkListing>,
+        SwipeRefreshLayout.OnRefreshListener,
+        SubredditLinksAdapter.Callback {
 
     /** Specifies the subreddit for this fragment to display the listing of.
      * If not specified, this Fragment will simply show the frontpage. */
     public static final String ARGUMENT_SUBREDDIT = "com.nguyenmp.reader.SubredditLinkListing.ARGUMENT_SUBREDDIT";
     public static final String STATE_SUBREDDIT = "state_subreddit";
+
+    private static final int LOADER_ID = 0;
 
     private String mSubreddit;
 
@@ -61,14 +64,14 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         getListView().setBackgroundColor(getResources().getColor(R.color.cards_background));
         getSwipeRefreshLayout().setBackgroundColor(getResources().getColor(R.color.cards_background));
         setEmptyText(getString(R.string.empty_subreddit));
-        setListAdapter(new SubredditLinksAdapter(getActivity()));
+        setListAdapter(new SubredditLinksAdapter(getActivity(), this));
         setListShown(false);
         setRefreshing(true);
         if (savedInstanceState == null) refresh();
         else {
             Bundle args = new Bundle();
             args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
-            getLoaderManager().initLoader(0, args, this);
+            getLoaderManager().initLoader(LOADER_ID, args, this);
         }
         setOnRefreshListener(this);
     }
@@ -84,7 +87,7 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         setListShown(false);
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
-        getLoaderManager().restartLoader(0, args, this);
+        getLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
     @Override
@@ -102,6 +105,12 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
     @Override
     public void onLoaderReset(Loader<SubredditLinkListing> loader) {
         getListAdapter().clear();
+        setRefreshing(true);
+    }
+
+    @Override
+    public void loadMore() {
+        getLoaderManager().getLoader(LOADER_ID).onContentChanged();
         setRefreshing(true);
     }
 
