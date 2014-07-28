@@ -50,7 +50,7 @@
     </LinearLayout>
 
     <View
-        android:background="#99999999"
+        android:background="@color/cards_shadow"
         android:layout_marginLeft="@dimen/cards_drop_shadow_margin"
         android:layout_marginRight="@dimen/cards_drop_shadow_margin"
         android:layout_width="match_parent"

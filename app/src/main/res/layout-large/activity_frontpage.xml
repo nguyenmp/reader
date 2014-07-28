@@ -9,15 +9,31 @@
 
     <!-- As the main content view, the view below consumes the entire
          space available using match_parent in both dimensions. -->
-    <FrameLayout
-        android:id="@+id/subreddit_listing_container"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:baselineAligned="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/link_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <FrameLayout
+            android:id="@+id/subreddit_listing_container"
+            android:layout_weight="0.65"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <View
+            android:layout_width="@dimen/cards_drop_shadow_height"
+            android:layout_height="match_parent"
+            android:background="@color/cards_shadow" />
+
+        <FrameLayout
+            android:background="@color/cards_background"
+            android:id="@+id/link_container"
+            android:layout_weight="0.35"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
 
     <!-- android:layout_gravity="start" tells DrawerLayout to treat
          this as a sliding drawer on the left side for left-to-right

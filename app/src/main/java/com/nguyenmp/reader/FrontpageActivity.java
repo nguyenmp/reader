@@ -42,7 +42,7 @@ public class FrontpageActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         if (savedInstanceState == null) getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, SubredditLinkListingFragment.newInstance(), FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
+                .replace(R.id.subreddit_listing_container, SubredditLinkListingFragment.newInstance(), FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
     }
 
     @Override
@@ -138,7 +138,7 @@ public class FrontpageActivity extends ActionBarActivity
         SubredditLinkListingFragment subredditFragment = (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         if (subredditFragment == null) {
             subredditFragment = SubredditLinkListingFragment.newInstance(subreddit);
-            fragmentTransaction.replace(R.id.container, subredditFragment, FRAGMENT_TAG_SUBREDDIT_LISTING);
+            fragmentTransaction.replace(R.id.subreddit_listing_container, subredditFragment, FRAGMENT_TAG_SUBREDDIT_LISTING);
         }
         subredditFragment.setSubreddit(subreddit);
         subredditFragment.refresh();
