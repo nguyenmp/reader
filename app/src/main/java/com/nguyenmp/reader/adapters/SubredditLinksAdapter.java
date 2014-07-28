@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SubredditLinksAdapter extends BaseAdapter {
+    private static final int LOAD_MORE_THRESHOLD = 5;  // Load more when we are 5 items from the bottom
+
     private final ArrayList<Link> data = new ArrayList<Link>();
     private final Context context;
     private final Callback callback;
@@ -45,7 +47,8 @@ public class SubredditLinksAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         // Load more if we're showing the last view
-        if (position >= data.size() - 1 && callback != null) callback.loadMore();
+        int lastItemIndex = data.size() - 1;
+        if (position >= (lastItemIndex) - LOAD_MORE_THRESHOLD && callback != null) callback.loadMore();
 
         // Inflate a new view if we cannot recycle an old one
         if (view == null) {
