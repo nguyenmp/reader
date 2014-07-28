@@ -62,13 +62,13 @@ public class FrontpageActivity extends ActionBarActivity
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        View customTitleView = LayoutInflater.from(this).inflate(R.layout.subreddit_picker_view, null, false);
-        TextView titleView = (TextView) customTitleView.findViewById(R.id.title_input);
-        titleView.setText(mSubreddit == null ? "Frontpage Of The Internet" : mSubreddit);
-        actionBar.setCustomView(customTitleView);
-        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setCustomView(R.layout.subreddit_picker_view);
         actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.getCustomView().setOnClickListener(new View.OnClickListener() {
+        actionBar.setDisplayShowCustomEnabled(true);
+
+        TextView titleView = (TextView) actionBar.getCustomView();
+        titleView.setText(mSubreddit == null ? "Frontpage Of The Internet" : mSubreddit);
+        titleView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
