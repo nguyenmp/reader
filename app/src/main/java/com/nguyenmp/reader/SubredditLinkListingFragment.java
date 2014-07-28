@@ -1,18 +1,19 @@
 package com.nguyenmp.reader;
 
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 
 import com.nguyenmp.reader.adapters.SubredditLinksAdapter;
 import com.nguyenmp.reader.loaders.SubredditLinksLoader;
+import com.nguyenmp.reader.util.SwipeRefreshListFragment;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
 
-public class SubredditLinkListingFragment extends ListFragment
+public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         implements Refreshable,
-        LoaderManager.LoaderCallbacks<SubredditLinkListing>{
+        LoaderManager.LoaderCallbacks<SubredditLinkListing>, SwipeRefreshLayout.OnRefreshListener {
 
     /** Specifies the subreddit for this fragment to display the listing of.
      * If not specified, this Fragment will simply show the frontpage. */
@@ -57,12 +58,14 @@ public class SubredditLinkListingFragment extends ListFragment
         setEmptyText(getString(R.string.empty_subreddit));
         setListAdapter(new SubredditLinksAdapter(getActivity()));
         setListShown(false);
+        setRefreshing(true);
         if (savedInstanceState == null) refresh();
         else {
             Bundle args = new Bundle();
             args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
             getLoaderManager().initLoader(0, args, this);
         }
+        setOnRefreshListener(this);
     }
 
     @Override
@@ -72,6 +75,7 @@ public class SubredditLinkListingFragment extends ListFragment
 
     @Override
     public void refresh() {
+        setRefreshing(true);
         setListShown(false);
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
@@ -87,12 +91,18 @@ public class SubredditLinkListingFragment extends ListFragment
     public void onLoadFinished(Loader<SubredditLinkListing> loader, SubredditLinkListing data) {
         if (data != null) getListAdapter().set(data.getData().getChildren());
         setListShown(true);
+        setRefreshing(false);
     }
 
     @Override
     public void onLoaderReset(Loader<SubredditLinkListing> loader) {
         getListAdapter().clear();
         setListShown(false);
+        setRefreshing(true);
     }
 
+    @Override
+    public void onRefresh() {
+        refresh();
+    }
 }
