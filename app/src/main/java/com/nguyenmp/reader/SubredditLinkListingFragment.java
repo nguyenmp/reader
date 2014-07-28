@@ -1,14 +1,18 @@
 package com.nguyenmp.reader;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
+import android.widget.ListView;
 
 import com.nguyenmp.reader.adapters.SubredditLinksAdapter;
 import com.nguyenmp.reader.loaders.SubredditLinksLoader;
 import com.nguyenmp.reader.util.SwipeRefreshListFragment;
+import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
 
 public class SubredditLinkListingFragment extends SwipeRefreshListFragment
@@ -54,6 +58,15 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
 
     public void setSubreddit(String subreddit) {
         this.mSubreddit = subreddit;
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Link link = getListAdapter().getItem(position);
+
+        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+        viewIntent.setData(Uri.parse(link.getData().getUrl()));
+        startActivity(viewIntent);
     }
 
     @Override
