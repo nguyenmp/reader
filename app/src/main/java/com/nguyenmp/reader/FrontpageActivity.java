@@ -12,10 +12,12 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.nguyenmp.reader.dialogs.SubredditPickerDialog;
+import com.nguyenmp.reddit.data.Link;
 
 public class FrontpageActivity extends ActionBarActivity
         implements Refreshable,
-        SubredditPickerDialog.Callback {
+        SubredditPickerDialog.Callback,
+        SubredditLinkListingFragment.Callback {
 
     private static final String FRAGMENT_TAG_SUBREDDIT_LISTING = "Listing Fragment";
     private static final String FRAGMENT_TAG_POST = "Post";
@@ -150,4 +152,25 @@ public class FrontpageActivity extends ActionBarActivity
         restoreActionBar();
     }
 
+    @Override
+    public void onLinkClicked(Link[] links, int position) {
+        FragmentManager fm = getSupportFragmentManager();
+
+        // Pop the previous link if necessary
+        if (fm.findFragmentByTag(FRAGMENT_TAG_POST) != null) fm.popBackStack();
+
+        // Otherwise, transact the new link in
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
+        ft.replace(R.id.link_container, SubredditLinkFragment.newInstance(links[position].getData().getSubreddit()), FRAGMENT_TAG_POST);
+        ft.addToBackStack("asdf");
+        ft.commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentByTag(FRAGMENT_TAG_POST) != null) fm.popBackStack();
+        else super.onBackPressed();
+    }
 }

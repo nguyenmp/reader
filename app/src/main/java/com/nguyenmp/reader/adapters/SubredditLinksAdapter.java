@@ -67,6 +67,10 @@ public class SubredditLinksAdapter extends BaseAdapter {
         return view;
     }
 
+    public Link[] getData() {
+        return data.toArray(new Link[data.size()]);
+    }
+
     public void add(Link... newData) {
         data.addAll(Arrays.asList(newData));
         notifyDataSetChanged();

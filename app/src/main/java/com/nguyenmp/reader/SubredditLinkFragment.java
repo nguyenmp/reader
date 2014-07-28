@@ -1,31 +1,41 @@
 package com.nguyenmp.reader;
 
 import android.app.Activity;
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
+import android.widget.ListView;
 
+import com.nguyenmp.reader.adapters.SubredditLinksAdapter;
+import com.nguyenmp.reader.loaders.SubredditLinksLoader;
+import com.nguyenmp.reader.util.SwipeRefreshListFragment;
 import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
-import com.nguyenmp.reddit.nio.SubredditLinkListingRunnable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+public class SubredditLinkFragment extends SwipeRefreshListFragment
+        implements Refreshable,
+        LoaderManager.LoaderCallbacks<SubredditLinkListing>,
+        SwipeRefreshLayout.OnRefreshListener,
+        SubredditLinksAdapter.Callback {
 
-public class SubredditLinkFragment extends ListFragment implements Refreshable {
+    public static interface Callback {
+        public void onLinkClicked(Link[] links, int position);
+    }
 
     /** Specifies the subreddit for this fragment to display the listing of.
      * If not specified, this Fragment will simply show the frontpage. */
     public static final String ARGUMENT_SUBREDDIT = "com.nguyenmp.reader.SubredditLinkListing.ARGUMENT_SUBREDDIT";
+    public static final String STATE_SUBREDDIT = "state_subreddit";
+
+    private static final int LOADER_ID = 0;
+
+    private String mSubreddit;
+    private Callback mCallback;
 
     public static SubredditLinkFragment newInstance() {
-        return new SubredditLinkFragment();
+        return newInstance(null);
     }
 
     public static SubredditLinkFragment newInstance(String subreddit) {
@@ -37,92 +47,93 @@ public class SubredditLinkFragment extends ListFragment implements Refreshable {
     }
 
     @Override
+    public void onCreate(Bundle inState) {
+        super.onCreate(inState);
+        mSubreddit = getArguments().getString(ARGUMENT_SUBREDDIT);
+        if (inState != null) mSubreddit = inState.getString(STATE_SUBREDDIT);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(STATE_SUBREDDIT, mSubreddit);
+    }
+
+    public void setSubreddit(String subreddit) {
+        this.mSubreddit = subreddit;
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Link[] data = getListAdapter().getData();
+
+        if (mCallback != null) mCallback.onLinkClicked(data, position);
+//        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+//        viewIntent.setData(Uri.parse(link.getData().getUrl()));
+//        startActivity(viewIntent);
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setListAdapter(new ListAdapter(getActivity()));
-        refresh();
+        getListView().setDivider(null);
+        getListView().setDividerHeight(0);
+        getListView().setBackgroundColor(getResources().getColor(R.color.cards_background));
+        getSwipeRefreshLayout().setBackgroundColor(getResources().getColor(R.color.cards_background));
+        setEmptyText(getString(R.string.empty_subreddit));
+        setListAdapter(new SubredditLinksAdapter(getActivity(), this));
+        setListShown(false);
+        setRefreshing(true);
+        if (savedInstanceState == null) refresh();
+        else {
+            Bundle args = new Bundle();
+            args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
+            getLoaderManager().initLoader(LOADER_ID, args, this);
+        }
+        setOnRefreshListener(this);
+    }
+
+    @Override
+    public SubredditLinksAdapter getListAdapter() {
+        return (SubredditLinksAdapter) super.getListAdapter();
     }
 
     @Override
     public void refresh() {
-        Activity activity = getActivity();
-        if (activity != null) {
-            new FetchListingTask(null, (ListAdapter) getListAdapter()).execute();
-        }
+        setRefreshing(true);
+        setListShown(false);
+        Bundle args = new Bundle();
+        args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
+        getLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
-    private static class FetchListingTask extends AsyncTask<Void, Void, SubredditLinkListing> {
-        private final String subreddit;
-        private final ListAdapter adapter;
-
-        private FetchListingTask(String subreddit, ListAdapter adapter) {
-            this.subreddit = subreddit;
-            this.adapter = adapter;
-        }
-
-        @Override
-        protected SubredditLinkListing doInBackground(Void... params) {
-            try {
-                SubredditLinkListing result =  new SubredditLinkListingRunnable(subreddit).runBlockingMode();
-                return result;
-            } catch (Exception e) {
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(SubredditLinkListing subredditLinkListing) {
-            if (subredditLinkListing != null) {
-                adapter.add(subredditLinkListing.getData().getChildren());
-            }
-        }
+    @Override
+    public Loader<SubredditLinkListing> onCreateLoader(int id, Bundle args) {
+        return new SubredditLinksLoader(getActivity(), args.getString(ARGUMENT_SUBREDDIT));
     }
 
-    private static class ListAdapter extends BaseAdapter {
-        private final ArrayList<Link> data = new ArrayList<Link>();
-        private final Context context;
+    @Override
+    public void onLoadFinished(Loader<SubredditLinkListing> loader, SubredditLinkListing data) {
+        if (data != null) getListAdapter().set(data.getData().getChildren());
+        setListShown(true);
+        setRefreshing(false);
+    }
 
-        private ListAdapter(Context context) {
-            this.context = context;
-        }
+    @Override
+    public void onLoaderReset(Loader<SubredditLinkListing> loader) {
+        getListAdapter().clear();
+        setRefreshing(true);
+    }
 
-        @Override
-        public int getCount() {
-            return data.size();
-        }
+    @Override
+    public void loadMore() {
+        getLoaderManager().getLoader(LOADER_ID).onContentChanged();
+        setRefreshing(true);
+    }
 
-        @Override
-        public Link getItem(int position) {
-            return data.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View view, ViewGroup parent) {
-            // Inflate a new view if we cannot recycle an old one
-            if (view == null) {
-                LayoutInflater layoutInflater = LayoutInflater.from(context);
-                view = layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false);
-            }
-
-            Link link = getItem(position);
-
-            TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-            text1.setText(link.getData().getTitle());
-
-            TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-            text2.setText(link.getData().getSubreddit());
-
-            return view;
-        }
-
-        public void add(Link... newData) {
-            data.addAll(Arrays.asList(newData));
-            notifyDataSetChanged();
-        }
+    @Override
+    public void onRefresh() {
+        refresh();
     }
 }

@@ -1,5 +1,6 @@
 package com.nguyenmp.reader;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +22,10 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         SwipeRefreshLayout.OnRefreshListener,
         SubredditLinksAdapter.Callback {
 
+    public static interface Callback {
+        public void onLinkClicked(Link[] links, int position);
+    }
+
     /** Specifies the subreddit for this fragment to display the listing of.
      * If not specified, this Fragment will simply show the frontpage. */
     public static final String ARGUMENT_SUBREDDIT = "com.nguyenmp.reader.SubredditLinkListing.ARGUMENT_SUBREDDIT";
@@ -29,6 +34,7 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
     private static final int LOADER_ID = 0;
 
     private String mSubreddit;
+    private Callback mCallback;
 
     public static SubredditLinkListingFragment newInstance() {
         return newInstance(null);
@@ -40,6 +46,20 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         arguments.putString(ARGUMENT_SUBREDDIT, subreddit);
         fragment.setArguments(arguments);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        mCallback = (Callback) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        mCallback = null;
     }
 
     @Override
@@ -62,11 +82,12 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Link link = getListAdapter().getItem(position);
+        Link[] data = getListAdapter().getData();
 
-        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
-        viewIntent.setData(Uri.parse(link.getData().getUrl()));
-        startActivity(viewIntent);
+        if (mCallback != null) mCallback.onLinkClicked(data, position);
+//        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+//        viewIntent.setData(Uri.parse(link.getData().getUrl()));
+//        startActivity(viewIntent);
     }
 
     @Override
