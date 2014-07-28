@@ -63,7 +63,7 @@ public class SubredditLinksAdapter extends BaseAdapter {
     public void set(Link... newData) {
         data.clear();
         data.addAll(Arrays.asList(newData));
-        notifyDataSetChanged();;
+        notifyDataSetChanged();
     }
 
     public void clear() {

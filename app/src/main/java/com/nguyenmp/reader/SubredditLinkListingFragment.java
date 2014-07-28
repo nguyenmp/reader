@@ -1,5 +1,6 @@
 package com.nguyenmp.reader;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -55,6 +56,9 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getListView().setDivider(null);
+        getListView().setDividerHeight(0);
+        getListView().setBackgroundColor(Color.parseColor("#FFDDDDDD"));
         setEmptyText(getString(R.string.empty_subreddit));
         setListAdapter(new SubredditLinksAdapter(getActivity()));
         setListShown(false);
@@ -97,7 +101,6 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
     @Override
     public void onLoaderReset(Loader<SubredditLinkListing> loader) {
         getListAdapter().clear();
-        setListShown(false);
         setRefreshing(true);
     }
 

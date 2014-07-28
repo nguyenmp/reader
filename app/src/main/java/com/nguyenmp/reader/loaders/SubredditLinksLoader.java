@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
+import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
 import com.nguyenmp.reddit.nio.SubredditLinkListingRunnable;
 
@@ -65,6 +66,14 @@ public class SubredditLinksLoader extends AsyncTaskLoader<SubredditLinkListing> 
         // We must protect it until the new data has been delivered.
         SubredditLinkListing oldData = mData;
         mData = data;
+        if (oldData != null) {
+            Link[] oldChildren = oldData.getData().getChildren();
+            Link[] freshChildren = mData.getData().getChildren();
+            Link[] newChildren = new Link[oldChildren.length + freshChildren.length];
+            System.arraycopy(oldChildren, 0, newChildren, 0, oldChildren.length);
+            System.arraycopy(freshChildren, 0, newChildren, oldChildren.length, freshChildren.length);
+            mData.getData().setChildren(newChildren);
+        }
 
         if (isStarted()) {
             // If the Loader is in a started state, deliver the results to the
