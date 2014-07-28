@@ -58,7 +58,8 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         super.onViewCreated(view, savedInstanceState);
         getListView().setDivider(null);
         getListView().setDividerHeight(0);
-        getListView().setBackgroundColor(Color.parseColor("#FFDDDDDD"));
+        getListView().setBackgroundColor(getResources().getColor(R.color.cards_background));
+        getSwipeRefreshLayout().setBackgroundColor(getResources().getColor(R.color.cards_background));
         setEmptyText(getString(R.string.empty_subreddit));
         setListAdapter(new SubredditLinksAdapter(getActivity()));
         setListShown(false);
