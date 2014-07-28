@@ -22,5 +22,6 @@
     <string name="modify_accounts">Modify Accounts</string>
     <string name="giant_snoo">Giant Snoo</string>
     <string name="thumbnail">Thumbnail</string>
+    <string name="empty_subreddit">This Subreddit Is Empty</string>
 
 </resources>
