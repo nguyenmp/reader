@@ -1,10 +1,11 @@
 package com.nguyenmp.reader;
 
-import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,9 @@ import com.nguyenmp.reddit.nio.SubredditLinkListingRunnable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SubredditLinkListingFragment extends ListFragment implements Refreshable {
+public class SubredditLinkListingFragment extends ListFragment
+        implements Refreshable,
+        LoaderManager.LoaderCallbacks<SubredditLinkListing>{
 
     /** Specifies the subreddit for this fragment to display the listing of.
      * If not specified, this Fragment will simply show the frontpage. */
@@ -61,9 +64,15 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setEmptyText(getString(R.string.empty_subreddit));
         setListAdapter(new ListAdapter(getActivity()));
-        Log.d("Subreddits", "Saved state = " + savedInstanceState);
-        refresh();
+        setListShown(false);
+        if (savedInstanceState == null) refresh();
+        else {
+            Bundle args = new Bundle();
+            args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
+            getLoaderManager().initLoader(0, args, this);
+        }
     }
 
     @Override
@@ -73,40 +82,127 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
 
     @Override
     public void refresh() {
-        getListAdapter().clear();
         setListShown(false);
-        Activity activity = getActivity();
-        if (activity != null) {
-            new FetchListingTask(mSubreddit, getListAdapter(), this).execute();
-        }
+        Bundle args = new Bundle();
+        args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
+        getLoaderManager().restartLoader(0, args, this);
     }
 
-    private static class FetchListingTask extends AsyncTask<Void, Void, SubredditLinkListing> {
-        private final String subreddit;
-        private final ListAdapter adapter;
-        private final ListFragment fragment;
+    @Override
+    public Loader<SubredditLinkListing> onCreateLoader(int id, Bundle args) {
+        return new LinksLoader(getActivity(), args.getString(ARGUMENT_SUBREDDIT));
+    }
 
-        private FetchListingTask(String subreddit, ListAdapter adapter, ListFragment fragment) {
-            this.subreddit = subreddit;
-            this.adapter = adapter;
-            this.fragment = fragment;
+    @Override
+    public void onLoadFinished(Loader<SubredditLinkListing> loader, SubredditLinkListing data) {
+        if (data != null) getListAdapter().set(data.getData().getChildren());
+        setListShown(true);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<SubredditLinkListing> loader) {
+        getListAdapter().clear();
+        setListShown(false);
+    }
+
+    private static class LinksLoader extends AsyncTaskLoader<SubredditLinkListing> {
+        private final String mSubreddit;
+        private SubredditLinkListing mData;
+
+        public LinksLoader(Context context, String subreddit) {
+            super(context);
+            this.mSubreddit = subreddit;
         }
 
         @Override
-        protected SubredditLinkListing doInBackground(Void... params) {
+        public SubredditLinkListing loadInBackground() {
+            Log.d("Testing", "Loading in background");
             try {
-                return new SubredditLinkListingRunnable(subreddit).runBlockingMode();
+                return new SubredditLinkListingRunnable(mSubreddit).runBlockingMode();
             } catch (Exception e) {
                 return null;
             }
         }
 
         @Override
-        protected void onPostExecute(SubredditLinkListing subredditLinkListing) {
-            if (subredditLinkListing != null) {
-                adapter.add(subredditLinkListing.getData().getChildren());
-                fragment.setListShown(true);
+        protected void onStartLoading() {
+            if (mData != null) {
+                // Deliver any previously loaded data immediately.
+                deliverResult(mData);
             }
+
+            if (takeContentChanged() || mData == null) {
+                // When the observer detects a change, it should call onContentChanged()
+                // on the Loader, which will cause the next call to takeContentChanged()
+                // to return true. If this is ever the case (or if the current data is
+                // null), we force a new load.
+                forceLoad();
+            }
+        }
+
+        @Override
+        protected void onStopLoading() {
+            // The Loader is in a stopped state, so we should attempt to cancel the
+            // current load (if there is one).
+            cancelLoad();
+
+            // Note that we leave the observer as is. Loaders in a stopped state
+            // should still monitor the data source for changes so that the Loader
+            // will know to force a new load if it is ever started again.
+        }
+
+        @Override
+        public void deliverResult(SubredditLinkListing data) {
+            if (isReset()) {
+                // The Loader has been reset; ignore the result and invalidate the data.
+                releaseResources(data);
+                return;
+            }
+
+            // Hold a reference to the old data so it doesn't get garbage collected.
+            // We must protect it until the new data has been delivered.
+            SubredditLinkListing oldData = mData;
+            mData = data;
+
+            if (isStarted()) {
+                // If the Loader is in a started state, deliver the results to the
+                // client. The superclass method does this for us.
+                super.deliverResult(data);
+            }
+
+            // Invalidate the old data as we don't need it any more.
+            if (oldData != null && oldData != data) {
+                releaseResources(oldData);
+            }
+        }
+
+
+        @Override
+        protected void onReset() {
+            // Ensure the loader has been stopped.
+            onStopLoading();
+
+            // At this point we can release the resources associated with 'mData'.
+            if (mData != null) {
+                releaseResources(mData);
+                mData = null;
+            }
+        }
+
+        @Override
+        public void onCanceled(SubredditLinkListing data) {
+            // Attempt to cancel the current asynchronous load.
+            super.onCanceled(data);
+
+            // The load has been canceled, so we should release the resources
+            // associated with 'data'.
+            releaseResources(data);
+        }
+
+        private void releaseResources(SubredditLinkListing data) {
+            // For a simple List, there is nothing to do. For something like a Cursor, we
+            // would close it in this method. All resources associated with the Loader
+            // should be released here.
         }
     }
 
@@ -155,6 +251,12 @@ public class SubredditLinkListingFragment extends ListFragment implements Refres
         public void add(Link... newData) {
             data.addAll(Arrays.asList(newData));
             notifyDataSetChanged();
+        }
+
+        public void set(Link... newData) {
+            data.clear();
+            data.addAll(Arrays.asList(newData));
+            notifyDataSetChanged();;
         }
 
         public void clear() {
