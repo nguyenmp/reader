@@ -5,10 +5,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
-import android.widget.ListView;
 
 import com.nguyenmp.reader.adapters.SubredditLinksAdapter;
-import com.nguyenmp.reader.loaders.SubredditLinksLoader;
 import com.nguyenmp.reader.util.SwipeRefreshListFragment;
 import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
@@ -19,43 +17,20 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
         SwipeRefreshLayout.OnRefreshListener,
         SubredditLinksAdapter.Callback {
 
-    public static final String ARGUMENT_LINKS = "argument_links";
-    public static final String ARGUMENT_POSITION = "argument_position";
-    public static final String STATE_POSITION = "state_position";
+    public static final String ARGUMENT_LINK_ID = "argument_link";
 
     private static final int LOADER_ID = 0;
 
-    private Link[] mLinks;
-    private int mPosition;
-
-    public static SubredditLinkFragment newInstance(Link link) {
-        // It's like showing only one link (instead of multiple links)
-        return newInstance(new Link[] {link}, 0);
-    }
-
-    public static SubredditLinkFragment newInstance(Link[] links, int position) {
+    public static SubredditLinkFragment newInstance(String link_id) {
         SubredditLinkFragment fragment = new SubredditLinkFragment();
         Bundle arguments = new Bundle();
-        arguments.putSerializable(ARGUMENT_LINKS, links);
-        arguments.putInt(ARGUMENT_POSITION, position);
+        arguments.putString(ARGUMENT_LINK_ID, link_id);
         fragment.setArguments(arguments);
         return fragment;
     }
 
-    @Override
-    public void onCreate(Bundle inState) {
-        super.onCreate(inState);
-        Bundle arguments = getArguments();
-        mLinks = (Link[]) arguments.getSerializable(ARGUMENT_LINKS);
-        mPosition = arguments.getInt(ARGUMENT_POSITION);
-        if (inState != null) mPosition = inState.getInt(STATE_POSITION);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putInt(STATE_POSITION, mPosition);
+    public static SubredditLinkFragment newInstance(Link link) {
+        return newInstance(link.getData().getId());
     }
 
     @Override
@@ -95,7 +70,6 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
     @Override
     public Loader<SubredditLinkListing> onCreateLoader(int id, Bundle args) {
         return null;
-//        return new SubredditLinksLoader(getActivity(), args.getString(ARGUMENT_SUBREDDIT));
     }
 
     @Override

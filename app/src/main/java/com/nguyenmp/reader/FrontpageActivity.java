@@ -162,7 +162,7 @@ public class FrontpageActivity extends ActionBarActivity
         // Otherwise, transact the new link in
         FragmentTransaction ft = fm.beginTransaction();
         ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
-        ft.replace(R.id.link_container, SubredditLinkFragment.newInstance(links, position), FRAGMENT_TAG_POST);
+        ft.replace(R.id.link_container, SubredditLinkFragment.newInstance(links[position]), FRAGMENT_TAG_POST);
         ft.addToBackStack("asdf");
         ft.commit();
     }
