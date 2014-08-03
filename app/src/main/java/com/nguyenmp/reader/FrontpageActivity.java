@@ -3,6 +3,7 @@ package com.nguyenmp.reader;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -35,16 +36,28 @@ public class FrontpageActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_frontpage);
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
         mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+                fragmentManager.findFragmentById(R.id.navigation_drawer);
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        if (savedInstanceState == null) getSupportFragmentManager().beginTransaction()
-                .replace(R.id.subreddit_listing_container, SubredditLinkListingFragment.newInstance(), FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
+        final SubredditLinkListingFragment listingFragment;
+        if (savedInstanceState == null) {
+            listingFragment = SubredditLinkListingFragment.newInstance();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.subreddit_listing_container, listingFragment, FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
+        } else {
+            listingFragment =
+                    (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+        }
+
+        ViewPager pager = (ViewPager) findViewById(R.id.link_container);
+        pager.setAdapter(new SubredditLinksPagerAdapter(fragmentManager, listingFragment));
     }
 
     @Override
@@ -160,11 +173,10 @@ public class FrontpageActivity extends ActionBarActivity
         if (fm.findFragmentByTag(FRAGMENT_TAG_POST) != null) fm.popBackStack();
 
         // Otherwise, transact the new link in
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right);
-        ft.replace(R.id.link_container, SubredditLinkFragment.newInstance(links[position]), FRAGMENT_TAG_POST);
-        ft.addToBackStack("asdf");
-        ft.commit();
+        ViewPager pager = (ViewPager) findViewById(R.id.link_container);
+        SubredditLinksPagerAdapter adapter = (SubredditLinksPagerAdapter) pager.getAdapter();
+        adapter.set(links);
+        pager.setCurrentItem(position, true);
     }
 
     @Override

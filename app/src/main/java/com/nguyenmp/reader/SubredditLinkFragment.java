@@ -40,16 +40,16 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
         getListView().setDividerHeight(0);
         getListView().setBackgroundColor(getResources().getColor(R.color.cards_background));
         getSwipeRefreshLayout().setBackgroundColor(getResources().getColor(R.color.cards_background));
-        setEmptyText(getString(R.string.empty_subreddit));
+        setEmptyText(getArguments().getString(ARGUMENT_LINK_ID));
         setListAdapter(new SubredditLinksAdapter(getActivity(), this));
-        setListShown(false);
-        setRefreshing(true);
-        if (savedInstanceState == null) refresh();
-        else {
-//            Bundle args = new Bundle();
-//            args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
-//            getLoaderManager().initLoader(LOADER_ID, args, this);
-        }
+//        setListShown(false);
+//        setRefreshing(true);
+//        if (savedInstanceState == null) refresh();
+//        else {
+////            Bundle args = new Bundle();
+////            args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
+////            getLoaderManager().initLoader(LOADER_ID, args, this);
+//        }
         setOnRefreshListener(this);
     }
 
