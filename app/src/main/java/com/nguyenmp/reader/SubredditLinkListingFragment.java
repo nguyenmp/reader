@@ -24,6 +24,7 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
 
     public static interface Callback {
         public void onLinkClicked(Link[] links, int position);
+        public void onMoreLoaded(Link[] links);
     }
 
     /** Specifies the subreddit for this fragment to display the listing of.
@@ -131,7 +132,10 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
 
     @Override
     public void onLoadFinished(Loader<SubredditLinkListing> loader, SubredditLinkListing data) {
-        if (data != null) getListAdapter().set(data.getData().getChildren());
+        if (data != null) {
+            getListAdapter().set(data.getData().getChildren());
+            if (mCallback != null) mCallback.onMoreLoaded(data.getData().getChildren());
+        }
         setListShown(true);
         setRefreshing(false);
     }

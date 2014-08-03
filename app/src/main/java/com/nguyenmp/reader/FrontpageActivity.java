@@ -172,11 +172,20 @@ public class FrontpageActivity extends ActionBarActivity
         // Pop the previous link if necessary
         if (fm.findFragmentByTag(FRAGMENT_TAG_POST) != null) fm.popBackStack();
 
-        // Otherwise, transact the new link in
+        // Update the list if needed
+        onMoreLoaded(links);
+
+        // And set selection
+        ViewPager pager = (ViewPager) findViewById(R.id.link_container);
+        pager.setCurrentItem(position, true);
+    }
+
+    @Override
+    public void onMoreLoaded(Link[] links) {
+        // Show the new items
         ViewPager pager = (ViewPager) findViewById(R.id.link_container);
         SubredditLinksPagerAdapter adapter = (SubredditLinksPagerAdapter) pager.getAdapter();
         adapter.set(links);
-        pager.setCurrentItem(position, true);
     }
 
     @Override
