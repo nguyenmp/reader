@@ -2,7 +2,9 @@ package com.nguyenmp.reddit.data;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Thing {
+import java.io.Serializable;
+
+public class Thing implements Serializable {
     private String kind;
 
     @JsonProperty("kind")

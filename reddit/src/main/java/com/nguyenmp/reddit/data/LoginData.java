@@ -2,7 +2,9 @@ package com.nguyenmp.reddit.data;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class LoginData {
+import java.io.Serializable;
+
+public class LoginData implements Serializable {
     @JsonProperty
     public String modhash, cookie;
 

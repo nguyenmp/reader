@@ -1,8 +1,13 @@
 package com.nguyenmp.reddit.data;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-public class ListingData<ItemType> {
+import java.io.Serializable;
+
+@JsonSerialize
+public class ListingData<ItemType extends Serializable> implements Serializable {
     private String modhash, after, before;
     private ItemType[] children;
 

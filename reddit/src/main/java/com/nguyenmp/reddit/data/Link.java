@@ -1,6 +1,8 @@
 package com.nguyenmp.reddit.data;
 
-public class Link extends Thing {
+import java.io.Serializable;
+
+public class Link extends Thing implements Serializable {
     private LinkData data;
 
     public LinkData getData() {

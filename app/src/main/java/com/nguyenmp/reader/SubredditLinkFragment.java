@@ -1,6 +1,5 @@
 package com.nguyenmp.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -20,28 +19,25 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
         SwipeRefreshLayout.OnRefreshListener,
         SubredditLinksAdapter.Callback {
 
-    public static interface Callback {
-        public void onLinkClicked(Link[] links, int position);
-    }
-
-    /** Specifies the subreddit for this fragment to display the listing of.
-     * If not specified, this Fragment will simply show the frontpage. */
-    public static final String ARGUMENT_SUBREDDIT = "com.nguyenmp.reader.SubredditLinkListing.ARGUMENT_SUBREDDIT";
-    public static final String STATE_SUBREDDIT = "state_subreddit";
+    public static final String ARGUMENT_LINKS = "argument_links";
+    public static final String ARGUMENT_POSITION = "argument_position";
+    public static final String STATE_POSITION = "state_position";
 
     private static final int LOADER_ID = 0;
 
-    private String mSubreddit;
-    private Callback mCallback;
+    private Link[] mLinks;
+    private int mPosition;
 
-    public static SubredditLinkFragment newInstance() {
-        return newInstance(null);
+    public static SubredditLinkFragment newInstance(Link link) {
+        // It's like showing only one link (instead of multiple links)
+        return newInstance(new Link[] {link}, 0);
     }
 
-    public static SubredditLinkFragment newInstance(String subreddit) {
+    public static SubredditLinkFragment newInstance(Link[] links, int position) {
         SubredditLinkFragment fragment = new SubredditLinkFragment();
         Bundle arguments = new Bundle();
-        arguments.putString(ARGUMENT_SUBREDDIT, subreddit);
+        arguments.putSerializable(ARGUMENT_LINKS, links);
+        arguments.putInt(ARGUMENT_POSITION, position);
         fragment.setArguments(arguments);
         return fragment;
     }
@@ -49,29 +45,17 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
     @Override
     public void onCreate(Bundle inState) {
         super.onCreate(inState);
-        mSubreddit = getArguments().getString(ARGUMENT_SUBREDDIT);
-        if (inState != null) mSubreddit = inState.getString(STATE_SUBREDDIT);
+        Bundle arguments = getArguments();
+        mLinks = (Link[]) arguments.getSerializable(ARGUMENT_LINKS);
+        mPosition = arguments.getInt(ARGUMENT_POSITION);
+        if (inState != null) mPosition = inState.getInt(STATE_POSITION);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString(STATE_SUBREDDIT, mSubreddit);
-    }
-
-    public void setSubreddit(String subreddit) {
-        this.mSubreddit = subreddit;
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Link[] data = getListAdapter().getData();
-
-        if (mCallback != null) mCallback.onLinkClicked(data, position);
-//        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
-//        viewIntent.setData(Uri.parse(link.getData().getUrl()));
-//        startActivity(viewIntent);
+        outState.putInt(STATE_POSITION, mPosition);
     }
 
     @Override
@@ -87,9 +71,9 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
         setRefreshing(true);
         if (savedInstanceState == null) refresh();
         else {
-            Bundle args = new Bundle();
-            args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
-            getLoaderManager().initLoader(LOADER_ID, args, this);
+//            Bundle args = new Bundle();
+//            args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
+//            getLoaderManager().initLoader(LOADER_ID, args, this);
         }
         setOnRefreshListener(this);
     }
@@ -104,13 +88,14 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
         setRefreshing(true);
         setListShown(false);
         Bundle args = new Bundle();
-        args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
+
         getLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
     @Override
     public Loader<SubredditLinkListing> onCreateLoader(int id, Bundle args) {
-        return new SubredditLinksLoader(getActivity(), args.getString(ARGUMENT_SUBREDDIT));
+        return null;
+//        return new SubredditLinksLoader(getActivity(), args.getString(ARGUMENT_SUBREDDIT));
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.nguyenmp.reddit.data;
 
-public class SubredditData {
+import java.io.Serializable;
+
+public class SubredditData implements Serializable {
     public String submit_text_html;
     public Boolean user_is_banned;
     public String id;

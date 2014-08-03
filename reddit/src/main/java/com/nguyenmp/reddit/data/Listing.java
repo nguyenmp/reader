@@ -1,6 +1,8 @@
 package com.nguyenmp.reddit.data;
 
-public class Listing<ItemType> extends Thing {
+import java.io.Serializable;
+
+public class Listing<ItemType extends Serializable> extends Thing implements Serializable {
     private ListingData<ItemType> data;
 
     public ListingData<ItemType> getData() {

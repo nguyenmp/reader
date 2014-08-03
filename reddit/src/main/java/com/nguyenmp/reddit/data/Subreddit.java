@@ -1,5 +1,7 @@
 package com.nguyenmp.reddit.data;
 
-public class Subreddit extends Thing {
+import java.io.Serializable;
+
+public class Subreddit extends Thing implements Serializable {
     public SubredditData data;
 }

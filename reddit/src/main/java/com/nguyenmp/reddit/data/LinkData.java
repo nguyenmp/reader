@@ -2,8 +2,10 @@ package com.nguyenmp.reddit.data;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.io.Serializable;
+
 @JsonIgnoreProperties("edited")
-public class LinkData implements Votable {
+public class LinkData implements Votable, Serializable {
     private String domain;
     private String banned_by;
     private Object media_embed;
@@ -45,6 +47,16 @@ public class LinkData implements Votable {
     private boolean visited;
     private Integer num_reports;
     private Object distinguished;
+
+    public Float getUpvote_ratio() {
+        return upvote_ratio;
+    }
+
+    public void setUpvote_ratio(Float upvote_ratio) {
+        this.upvote_ratio = upvote_ratio;
+    }
+
+    private Float upvote_ratio;
 
     public Object getSecure_media() {
         return secure_media;
