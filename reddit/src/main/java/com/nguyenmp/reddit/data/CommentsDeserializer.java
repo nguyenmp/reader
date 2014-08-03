@@ -26,8 +26,8 @@ public class CommentsDeserializer extends JsonDeserializer<Comments> {
 
         // Deserialize listing of comments
         JsonNode threadsNode = rootNode.get(1);
-        JavaType threadsType = mapper.getTypeFactory().constructParametricType(Listing.class, Comment.class);
-        comments.setThreads(mapper.<Listing<Comment>>readValue(threadsNode, threadsType));
+        JavaType threadsType = mapper.getTypeFactory().constructParametricType(Listing.class, Reply.class);
+        comments.setThreads(mapper.<Listing<Reply>>readValue(threadsNode, threadsType));
         return comments;
     }
 }

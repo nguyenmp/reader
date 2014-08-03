@@ -1,5 +1,8 @@
 package com.nguyenmp.reddit.data;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+@JsonSerialize
 public class Comment extends Reply {
     public CommentData getData() {
         return data;

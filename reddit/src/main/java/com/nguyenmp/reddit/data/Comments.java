@@ -13,7 +13,7 @@ import java.io.Serializable;
 @JsonSerialize
 public class Comments extends Thing implements Serializable {
     private Listing<Link> parent;
-    private Listing<Comment> threads;
+    private Listing<Reply> threads;
 
     public Listing<Link> getParent() {
         return parent;
@@ -23,11 +23,11 @@ public class Comments extends Thing implements Serializable {
         this.parent = parent;
     }
 
-    public Listing<Comment> getThreads() {
+    public Listing<Reply> getThreads() {
         return threads;
     }
 
-    public void setThreads(Listing<Comment> threads) {
+    public void setThreads(Listing<Reply> threads) {
         this.threads = threads;
     }
 

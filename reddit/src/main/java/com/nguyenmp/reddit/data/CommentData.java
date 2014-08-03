@@ -2,6 +2,8 @@ package com.nguyenmp.reddit.data;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import java.util.List;
+
 @JsonSerialize
 public class CommentData {
     private String subreddit_id;
@@ -9,7 +11,7 @@ public class CommentData {
     private String subreddit;
     private Boolean likes;
 
-    Replies replies;
+    Listing<Reply> replies;
     private boolean saved;
     private String id;
     private int gilded;
@@ -65,11 +67,11 @@ public class CommentData {
         this.likes = likes;
     }
 
-    public Replies getReplies() {
+    public Listing<Reply> getReplies() {
         return replies;
     }
 
-    public void setReplies(Replies replies) {
+    public void setReplies(Listing<Reply> replies) {
         this.replies = replies;
     }
 
