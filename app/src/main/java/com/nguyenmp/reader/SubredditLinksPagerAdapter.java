@@ -22,7 +22,8 @@ public class SubredditLinksPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if (position == listing.size() - 1) callback.loadMore();
+        int lastItemIndex = listing.size() - 1;
+        if (position >= lastItemIndex - SubredditLinksAdapter.LOAD_MORE_THRESHOLD) callback.loadMore();
         Link link = listing.get(position);
         return SubredditLinkFragment.newInstance(link);
     }

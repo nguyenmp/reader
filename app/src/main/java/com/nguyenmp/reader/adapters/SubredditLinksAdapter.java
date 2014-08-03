@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SubredditLinksAdapter extends BaseAdapter {
-    private static final int LOAD_MORE_THRESHOLD = 5;  // Load more when we are 5 items from the bottom
+    public static final int LOAD_MORE_THRESHOLD = 5;  // Load more when we are 5 items from the bottom
 
     private final ArrayList<Link> data = new ArrayList<Link>();
     private final Context context;
