@@ -6,30 +6,31 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 
-import com.nguyenmp.reader.adapters.SubredditLinksAdapter;
+import com.nguyenmp.reader.adapters.CommentsAdapter;
+import com.nguyenmp.reader.loaders.CommentsLoader;
 import com.nguyenmp.reader.util.SwipeRefreshListFragment;
+import com.nguyenmp.reddit.data.Comments;
 import com.nguyenmp.reddit.data.Link;
-import com.nguyenmp.reddit.data.SubredditLinkListing;
 
-public class SubredditLinkFragment extends SwipeRefreshListFragment
+public class CommentsFragment extends SwipeRefreshListFragment
         implements Refreshable,
-        LoaderManager.LoaderCallbacks<SubredditLinkListing>,
+        LoaderManager.LoaderCallbacks<Comments>,
         SwipeRefreshLayout.OnRefreshListener,
-        SubredditLinksAdapter.Callback {
+        CommentsAdapter.Callback {
 
     public static final String ARGUMENT_LINK_ID = "argument_link";
 
     private static final int LOADER_ID = 0;
 
-    public static SubredditLinkFragment newInstance(String link_id) {
-        SubredditLinkFragment fragment = new SubredditLinkFragment();
+    public static CommentsFragment newInstance(String link_id) {
+        CommentsFragment fragment = new CommentsFragment();
         Bundle arguments = new Bundle();
         arguments.putString(ARGUMENT_LINK_ID, link_id);
         fragment.setArguments(arguments);
         return fragment;
     }
 
-    public static SubredditLinkFragment newInstance(Link link) {
+    public static CommentsFragment newInstance(Link link) {
         return newInstance(link.getData().getId());
     }
 
@@ -40,48 +41,44 @@ public class SubredditLinkFragment extends SwipeRefreshListFragment
         getListView().setDividerHeight(0);
         getListView().setBackgroundColor(getResources().getColor(R.color.cards_background));
         getSwipeRefreshLayout().setBackgroundColor(getResources().getColor(R.color.cards_background));
-        setEmptyText(getArguments().getString(ARGUMENT_LINK_ID));
-        setListAdapter(new SubredditLinksAdapter(getActivity(), this));
-//        setListShown(false);
-//        setRefreshing(true);
-//        if (savedInstanceState == null) refresh();
-//        else {
-////            Bundle args = new Bundle();
-////            args.putString(ARGUMENT_SUBREDDIT, mSubreddit);
-////            getLoaderManager().initLoader(LOADER_ID, args, this);
-//        }
+        setEmptyText("No Content Found");
+
+        if (savedInstanceState == null) refresh();
+        else {
+            Bundle args = new Bundle();
+            args.putString(ARGUMENT_LINK_ID, getArguments().getString(ARGUMENT_LINK_ID));
+            getLoaderManager().initLoader(LOADER_ID, args, this);
+        }
         setOnRefreshListener(this);
     }
 
     @Override
-    public SubredditLinksAdapter getListAdapter() {
-        return (SubredditLinksAdapter) super.getListAdapter();
+    public CommentsAdapter getListAdapter() {
+        return (CommentsAdapter) super.getListAdapter();
     }
 
     @Override
     public void refresh() {
         setRefreshing(true);
         setListShown(false);
-        Bundle args = new Bundle();
-
-        getLoaderManager().restartLoader(LOADER_ID, args, this);
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
     }
 
     @Override
-    public Loader<SubredditLinkListing> onCreateLoader(int id, Bundle args) {
-        return null;
+    public Loader<Comments> onCreateLoader(int id, Bundle args) {
+        return new CommentsLoader(getActivity(), args.getString(ARGUMENT_LINK_ID));
     }
 
     @Override
-    public void onLoadFinished(Loader<SubredditLinkListing> loader, SubredditLinkListing data) {
-        if (data != null) getListAdapter().set(data.getData().getChildren());
+    public void onLoadFinished(Loader<Comments> loader, Comments data) {
+        if (data != null) setListAdapter(new CommentsAdapter(getActivity(), data));
         setListShown(true);
         setRefreshing(false);
     }
 
     @Override
-    public void onLoaderReset(Loader<SubredditLinkListing> loader) {
-        getListAdapter().clear();
+    public void onLoaderReset(Loader<Comments> loader) {
+        setListAdapter(null);
         setRefreshing(true);
     }
 

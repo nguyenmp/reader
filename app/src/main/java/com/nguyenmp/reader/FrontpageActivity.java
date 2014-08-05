@@ -146,7 +146,7 @@ public class FrontpageActivity extends ActionBarActivity
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         // Remove the fragment that shows the post
-        SubredditLinkFragment postFragment = (SubredditLinkFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_POST);
+        CommentsFragment postFragment = (CommentsFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_POST);
         if (postFragment != null) fragmentTransaction.remove(postFragment);
 
         // Refresh subreddit viewing

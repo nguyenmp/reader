@@ -1,8 +1,8 @@
 package com.nguyenmp.reader;
 
+import android.support.v4.app.FixedFragmentStatePagerAdapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.nguyenmp.reader.adapters.SubredditLinksAdapter;
 import com.nguyenmp.reddit.data.Link;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SubredditLinksPagerAdapter extends FragmentStatePagerAdapter {
+public class SubredditLinksPagerAdapter extends FixedFragmentStatePagerAdapter {
     private List<Link> listing = new ArrayList<Link>();
     private final SubredditLinksAdapter.Callback callback;
 
@@ -25,7 +25,7 @@ public class SubredditLinksPagerAdapter extends FragmentStatePagerAdapter {
         int lastItemIndex = listing.size() - 1;
         if (position >= lastItemIndex - SubredditLinksAdapter.LOAD_MORE_THRESHOLD) callback.loadMore();
         Link link = listing.get(position);
-        return SubredditLinkFragment.newInstance(link);
+        return CommentsFragment.newInstance(link);
     }
 
     @Override

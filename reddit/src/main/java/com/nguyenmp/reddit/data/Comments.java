@@ -44,7 +44,7 @@ public class Comments extends Thing implements Serializable {
 
         @Override
         public String getEndpoint() {
-            return String.format("comments/%s/_/.json?limit=1", linkID);
+            return String.format("comments/%s/_/.json", linkID);
         }
 
         @Override

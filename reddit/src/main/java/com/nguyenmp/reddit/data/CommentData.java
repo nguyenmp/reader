@@ -1,10 +1,12 @@
 package com.nguyenmp.reddit.data;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import java.util.List;
 
 @JsonSerialize
+@JsonIgnoreProperties({"edited"})
 public class CommentData {
     private String subreddit_id;
     private String banned_by;
