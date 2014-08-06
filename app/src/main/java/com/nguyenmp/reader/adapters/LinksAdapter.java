@@ -13,7 +13,7 @@ import com.nguyenmp.reddit.data.Link;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SubredditLinksAdapter extends BaseAdapter {
+public class LinksAdapter extends BaseAdapter {
     public static final int LOAD_MORE_THRESHOLD = 5;  // Load more when we are 5 items from the bottom
 
     private final ArrayList<Link> data = new ArrayList<Link>();
@@ -24,7 +24,7 @@ public class SubredditLinksAdapter extends BaseAdapter {
         public void loadMore();
     }
 
-    public SubredditLinksAdapter(Context context, Callback callback) {
+    public LinksAdapter(Context context, Callback callback) {
         this.context = context;
         this.callback = callback;
     }

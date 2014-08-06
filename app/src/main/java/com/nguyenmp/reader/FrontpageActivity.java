@@ -18,7 +18,7 @@ import com.nguyenmp.reddit.data.Link;
 public class FrontpageActivity extends ActionBarActivity
         implements Refreshable,
         SubredditPickerDialog.Callback,
-        SubredditLinkListingFragment.Callback {
+        LinksFragment.Callback {
 
     private static final String FRAGMENT_TAG_SUBREDDIT_LISTING = "Listing Fragment";
     private static final String FRAGMENT_TAG_POST = "Post";
@@ -46,14 +46,14 @@ public class FrontpageActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        final SubredditLinkListingFragment listingFragment;
+        final LinksFragment listingFragment;
         if (savedInstanceState == null) {
-            listingFragment = SubredditLinkListingFragment.newInstance();
+            listingFragment = LinksFragment.newInstance();
             fragmentManager.beginTransaction()
                     .replace(R.id.subreddit_listing_container, listingFragment, FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
         } else {
             listingFragment =
-                    (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+                    (LinksFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         }
 
         ViewPager pager = (ViewPager) findViewById(R.id.link_container);
@@ -127,8 +127,8 @@ public class FrontpageActivity extends ActionBarActivity
         drawerFragment.refresh();
 
         // Refresh subreddit viewing
-        SubredditLinkListingFragment listingFragment =
-                (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+        LinksFragment listingFragment =
+                (LinksFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         if (listingFragment != null) listingFragment.refresh();
     }
 
@@ -150,9 +150,9 @@ public class FrontpageActivity extends ActionBarActivity
         if (postFragment != null) fragmentTransaction.remove(postFragment);
 
         // Refresh subreddit viewing
-        SubredditLinkListingFragment subredditFragment = (SubredditLinkListingFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+        LinksFragment subredditFragment = (LinksFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         if (subredditFragment == null) {
-            subredditFragment = SubredditLinkListingFragment.newInstance(subreddit);
+            subredditFragment = LinksFragment.newInstance(subreddit);
             fragmentTransaction.replace(R.id.subreddit_listing_container, subredditFragment, FRAGMENT_TAG_SUBREDDIT_LISTING);
         }
         subredditFragment.setSubreddit(subreddit);

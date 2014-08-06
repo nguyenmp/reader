@@ -8,17 +8,17 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.ListView;
 
-import com.nguyenmp.reader.adapters.SubredditLinksAdapter;
+import com.nguyenmp.reader.adapters.LinksAdapter;
 import com.nguyenmp.reader.loaders.SubredditLinksLoader;
 import com.nguyenmp.reader.util.SwipeRefreshListFragment;
 import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
 
-public class SubredditLinkListingFragment extends SwipeRefreshListFragment
+public class LinksFragment extends SwipeRefreshListFragment
         implements Refreshable,
         LoaderManager.LoaderCallbacks<SubredditLinkListing>,
         SwipeRefreshLayout.OnRefreshListener,
-        SubredditLinksAdapter.Callback {
+        LinksAdapter.Callback {
 
     public static interface Callback {
         public void onLinkClicked(Link[] links, int position);
@@ -35,12 +35,12 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
     private String mSubreddit;
     private Callback mCallback;
 
-    public static SubredditLinkListingFragment newInstance() {
+    public static LinksFragment newInstance() {
         return newInstance(null);
     }
 
-    public static SubredditLinkListingFragment newInstance(String subreddit) {
-        SubredditLinkListingFragment fragment = new SubredditLinkListingFragment();
+    public static LinksFragment newInstance(String subreddit) {
+        LinksFragment fragment = new LinksFragment();
         Bundle arguments = new Bundle();
         arguments.putString(ARGUMENT_SUBREDDIT, subreddit);
         fragment.setArguments(arguments);
@@ -97,7 +97,7 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
         getListView().setBackgroundColor(getResources().getColor(R.color.cards_background));
         getSwipeRefreshLayout().setBackgroundColor(getResources().getColor(R.color.cards_background));
         setEmptyText(getString(R.string.empty_subreddit));
-        setListAdapter(new SubredditLinksAdapter(getActivity(), this));
+        setListAdapter(new LinksAdapter(getActivity(), this));
         setListShown(false);
         setRefreshing(true);
         if (savedInstanceState == null) refresh();
@@ -110,8 +110,8 @@ public class SubredditLinkListingFragment extends SwipeRefreshListFragment
     }
 
     @Override
-    public SubredditLinksAdapter getListAdapter() {
-        return (SubredditLinksAdapter) super.getListAdapter();
+    public LinksAdapter getListAdapter() {
+        return (LinksAdapter) super.getListAdapter();
     }
 
     @Override
