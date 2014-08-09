@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CommentsAdapter extends BaseAdapter {
+    private static final int ITEM_TYPE_LINK = 0, ITEM_TYPE_COMMENT = 1, ITEM_TYPE_MORE = 2;
+
     private final Context context;
     private Comments comments;
     private List<FlatReply> flatComments;
@@ -48,34 +50,71 @@ public class CommentsAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return position == 0 ? 0 : 1;
+        return 0;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) return ITEM_TYPE_LINK;
+        else if (getItem(position) instanceof Comment) return ITEM_TYPE_COMMENT;
+        else return ITEM_TYPE_MORE;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 3;
     }
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        // Inflate a new view if we cannot recycle an old one
+        // Delegate the work of building the view to the specific functions
+        // getLinkView, getCommentView, getMoreView
+
+        switch(getItemViewType(position)) {
+            case ITEM_TYPE_COMMENT:
+                return getCommentView(position, view, parent);
+            case ITEM_TYPE_LINK:
+                return getLinkView(position, view, parent);
+            case ITEM_TYPE_MORE:
+                return getMoreView(position, view, parent);
+        }
+
+        return null;
+    }
+
+    private View getLinkView(int position, View view, ViewGroup parent) {
+        Link link = comments.getParent().getData().getChildren()[0];
+        return LinksAdapter.renderLink(context, view, parent, link);
+    }
+
+    private View getMoreView(int position, View view, ViewGroup parent) {
+
         if (view == null) {
-            LayoutInflater layoutInflater = LayoutInflater.from(context);
-            view = layoutInflater.inflate(R.layout.list_item_link, parent, false);
+            LayoutInflater inflater = LayoutInflater.from(context);
+            view = inflater.inflate(R.layout.list_item_more_comments, parent, false);
         }
 
-        TextView title = (TextView) view.findViewById(R.id.list_item_link_title);
+        FlatReply reply = flatComments.get(position - 1);
+        view.setPadding(16 * reply.indent, 0, 0, 0);
 
-        if (position == 0) {
-            Link link = comments.getParent().getData().getChildren()[0];
-            title.setText(link.getData().getTitle());
-        } else {
-            FlatReply flatReply = flatComments.get(position - 1);
-            view.setPadding(16 * flatReply.indent, 0, 0, 0);
-            Reply reply = flatReply.reply;
-            if (reply instanceof MoreChildren) {
-                title.setText("Load More Children");
-            } else {
-                Comment comment = (Comment) reply;
-                String body = comment.getData().getBody();
-                title.setText(body);
-            }
+        return view;
+    }
+
+    private View getCommentView(int position, View view, ViewGroup parent) {
+        Comment comment = (Comment) getItem(position);
+
+        if (view == null) {
+            LayoutInflater inflater = LayoutInflater.from(context);
+            view = inflater.inflate(R.layout.list_item_comment, parent, false);
         }
+
+        FlatReply reply = flatComments.get(position - 1);
+        view.setPadding(16 * reply.indent, 0, 0, 0);
+
+        TextView bodyView = (TextView) view.findViewById(R.id.comment_body);
+        String body = comment.getData().getBody();
+        if (body == null) body = "";
+        bodyView.setText(body);
 
         return view;
     }
