@@ -18,10 +18,10 @@ import com.nguyenmp.reddit.data.Link;
 public class FrontpageActivity extends ActionBarActivity
         implements Refreshable,
         SubredditPickerDialog.Callback,
-        LinksFragment.Callback {
+        LinksListFragment.Callback {
 
     private static final String FRAGMENT_TAG_SUBREDDIT_LISTING = "Listing Fragment";
-    private static final String FRAGMENT_TAG_POST = "Post";
+    private static final String FRAGMENT_TAG_PAGER = "Post";
     private static final String STATE_SELECTED_SUBREDDIT = "state_selected_subreddit";
 
     private String mSubreddit = null;
@@ -46,18 +46,12 @@ public class FrontpageActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        final LinksFragment listingFragment;
+        final LinksListFragment listingFragment;
         if (savedInstanceState == null) {
-            listingFragment = LinksFragment.newInstance();
+            listingFragment = LinksListFragment.newInstance();
             fragmentManager.beginTransaction()
                     .replace(R.id.subreddit_listing_container, listingFragment, FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
-        } else {
-            listingFragment =
-                    (LinksFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         }
-
-        ViewPager pager = (ViewPager) findViewById(R.id.link_container);
-        pager.setAdapter(new SubredditLinksPagerAdapter(fragmentManager, listingFragment));
     }
 
     @Override
@@ -127,8 +121,8 @@ public class FrontpageActivity extends ActionBarActivity
         drawerFragment.refresh();
 
         // Refresh subreddit viewing
-        LinksFragment listingFragment =
-                (LinksFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+        LinksListFragment listingFragment =
+                (LinksListFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         if (listingFragment != null) listingFragment.refresh();
     }
 
@@ -146,13 +140,13 @@ public class FrontpageActivity extends ActionBarActivity
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         // Remove the fragment that shows the post
-        CommentsFragment postFragment = (CommentsFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_POST);
+        CommentsFragment postFragment = (CommentsFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_PAGER);
         if (postFragment != null) fragmentTransaction.remove(postFragment);
 
         // Refresh subreddit viewing
-        LinksFragment subredditFragment = (LinksFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
+        LinksListFragment subredditFragment = (LinksListFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         if (subredditFragment == null) {
-            subredditFragment = LinksFragment.newInstance(subreddit);
+            subredditFragment = LinksListFragment.newInstance(subreddit);
             fragmentTransaction.replace(R.id.subreddit_listing_container, subredditFragment, FRAGMENT_TAG_SUBREDDIT_LISTING);
         }
         subredditFragment.setSubreddit(subreddit);
@@ -169,29 +163,37 @@ public class FrontpageActivity extends ActionBarActivity
     public void onLinkClicked(Link[] links, int position) {
         FragmentManager fm = getSupportFragmentManager();
 
-        // Pop the previous link if necessary
-        if (fm.findFragmentByTag(FRAGMENT_TAG_POST) != null) fm.popBackStack();
+        // What I want to do is if the pager isn't visible, show it
+        LinksPagerFragment pager = (LinksPagerFragment) fm.findFragmentById(R.id.link_container);
+        if (pager == null) {
+            pager = LinksPagerFragment.newInstance();
+            fm.beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.link_container, pager, FRAGMENT_TAG_PAGER)
+                    .commit();
+        }
 
-        // Update the list if needed
-        onMoreLoaded(links);
+        // Update the pager list if needed
+        pager.setItems(links);
 
-        // And set selection
-        ViewPager pager = (ViewPager) findViewById(R.id.link_container);
+        // Then select the item
         pager.setCurrentItem(position, true);
     }
 
     @Override
     public void onMoreLoaded(Link[] links) {
         // Show the new items
-        ViewPager pager = (ViewPager) findViewById(R.id.link_container);
-        SubredditLinksPagerAdapter adapter = (SubredditLinksPagerAdapter) pager.getAdapter();
-        adapter.set(links);
+        FragmentManager fm = getSupportFragmentManager();
+        LinksPagerFragment pager = (LinksPagerFragment) fm.findFragmentById(R.id.link_container);
+        if (pager != null) {
+            pager.setItems(links);
+        }
     }
 
     @Override
     public void onBackPressed() {
         FragmentManager fm = getSupportFragmentManager();
-        if (fm.findFragmentByTag(FRAGMENT_TAG_POST) != null) fm.popBackStack();
+        if (fm.findFragmentByTag(FRAGMENT_TAG_PAGER) != null) fm.popBackStack();
         else super.onBackPressed();
     }
 }

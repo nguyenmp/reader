@@ -39,6 +39,10 @@ public class SubredditLinksPagerAdapter extends FixedFragmentStatePagerAdapter {
         notifyDataSetChanged();
     }
 
+    public Link[] get() {
+        return listing.toArray(new Link[listing.size()]);
+    }
+
     public void clear() {
         listing.clear();
         notifyDataSetChanged();

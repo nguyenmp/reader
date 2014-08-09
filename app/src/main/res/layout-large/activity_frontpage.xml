@@ -26,8 +26,7 @@
             android:layout_height="match_parent"
             android:background="@color/cards_shadow" />
 
-        <android.support.v4.view.ViewPager
-            android:background="@color/cards_background"
+        <FrameLayout
             android:id="@+id/link_container"
             android:layout_weight="0.35"
             android:layout_width="match_parent"

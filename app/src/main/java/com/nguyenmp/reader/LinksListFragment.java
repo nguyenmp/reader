@@ -14,7 +14,7 @@ import com.nguyenmp.reader.util.SwipeRefreshListFragment;
 import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
 
-public class LinksFragment extends SwipeRefreshListFragment
+public class LinksListFragment extends SwipeRefreshListFragment
         implements Refreshable,
         LoaderManager.LoaderCallbacks<SubredditLinkListing>,
         SwipeRefreshLayout.OnRefreshListener,
@@ -35,12 +35,12 @@ public class LinksFragment extends SwipeRefreshListFragment
     private String mSubreddit;
     private Callback mCallback;
 
-    public static LinksFragment newInstance() {
+    public static LinksListFragment newInstance() {
         return newInstance(null);
     }
 
-    public static LinksFragment newInstance(String subreddit) {
-        LinksFragment fragment = new LinksFragment();
+    public static LinksListFragment newInstance(String subreddit) {
+        LinksListFragment fragment = new LinksListFragment();
         Bundle arguments = new Bundle();
         arguments.putString(ARGUMENT_SUBREDDIT, subreddit);
         fragment.setArguments(arguments);
