@@ -3,7 +3,6 @@ package com.nguyenmp.reader;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -50,7 +49,7 @@ public class FrontpageActivity extends ActionBarActivity
         if (savedInstanceState == null) {
             listingFragment = LinksListFragment.newInstance();
             fragmentManager.beginTransaction()
-                    .replace(R.id.subreddit_listing_container, listingFragment, FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
+                    .replace(R.id.links_list_container, listingFragment, FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
         }
     }
 
@@ -75,7 +74,7 @@ public class FrontpageActivity extends ActionBarActivity
         actionBar.setDisplayShowCustomEnabled(true);
 
         TextView titleView = (TextView) actionBar.getCustomView();
-        titleView.setText(mSubreddit == null ? "Frontpage Of The Internet" : mSubreddit);
+        titleView.setText(mSubreddit == null ? getString(R.string.frontpage) : mSubreddit);
         titleView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,7 +146,7 @@ public class FrontpageActivity extends ActionBarActivity
         LinksListFragment subredditFragment = (LinksListFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG_SUBREDDIT_LISTING);
         if (subredditFragment == null) {
             subredditFragment = LinksListFragment.newInstance(subreddit);
-            fragmentTransaction.replace(R.id.subreddit_listing_container, subredditFragment, FRAGMENT_TAG_SUBREDDIT_LISTING);
+            fragmentTransaction.replace(R.id.links_list_container, subredditFragment, FRAGMENT_TAG_SUBREDDIT_LISTING);
         }
         subredditFragment.setSubreddit(subreddit);
         subredditFragment.refresh();
@@ -164,13 +163,17 @@ public class FrontpageActivity extends ActionBarActivity
         FragmentManager fm = getSupportFragmentManager();
 
         // What I want to do is if the pager isn't visible, show it
-        LinksPagerFragment pager = (LinksPagerFragment) fm.findFragmentById(R.id.link_container);
+        LinksPagerFragment pager = (LinksPagerFragment) fm.findFragmentById(R.id.comments_pager_container);
         if (pager == null) {
             pager = LinksPagerFragment.newInstance();
             fm.beginTransaction()
+                    .setCustomAnimations(R.anim.frontpage_pager_show, 0, 0, R.anim.frontpage_pager_hide)
                     .addToBackStack(null)
-                    .replace(R.id.link_container, pager, FRAGMENT_TAG_PAGER)
+                    .replace(R.id.comments_pager_container, pager, FRAGMENT_TAG_PAGER)
                     .commit();
+
+            LinksListFragment list = (LinksListFragment) fm.findFragmentById(R.id.links_list_container);
+            pager.setCallback(list);
         }
 
         // Update the pager list if needed
@@ -184,7 +187,7 @@ public class FrontpageActivity extends ActionBarActivity
     public void onMoreLoaded(Link[] links) {
         // Show the new items
         FragmentManager fm = getSupportFragmentManager();
-        LinksPagerFragment pager = (LinksPagerFragment) fm.findFragmentById(R.id.link_container);
+        LinksPagerFragment pager = (LinksPagerFragment) fm.findFragmentById(R.id.comments_pager_container);
         if (pager != null) {
             pager.setItems(links);
         }

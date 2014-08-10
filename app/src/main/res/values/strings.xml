@@ -23,5 +23,6 @@
     <string name="giant_snoo">Giant Snoo</string>
     <string name="thumbnail">Thumbnail</string>
     <string name="empty_subreddit">This Subreddit Is Empty</string>
+    <string name="frontpage">Frontpage</string>
 
 </resources>
