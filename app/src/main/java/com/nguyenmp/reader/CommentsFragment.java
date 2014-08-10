@@ -11,6 +11,9 @@ import com.nguyenmp.reader.loaders.CommentsLoader;
 import com.nguyenmp.reader.util.SwipeRefreshListFragment;
 import com.nguyenmp.reddit.data.Comments;
 import com.nguyenmp.reddit.data.Link;
+import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.AlphaInAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 
 public class CommentsFragment extends SwipeRefreshListFragment
         implements Refreshable,
@@ -21,6 +24,8 @@ public class CommentsFragment extends SwipeRefreshListFragment
     public static final String ARGUMENT_LINK_ID = "argument_link";
 
     private static final int LOADER_ID = 0;
+
+    private CommentsAdapter mAdapter;
 
     public static CommentsFragment newInstance(String link_id) {
         CommentsFragment fragment = new CommentsFragment();
@@ -54,7 +59,7 @@ public class CommentsFragment extends SwipeRefreshListFragment
 
     @Override
     public CommentsAdapter getListAdapter() {
-        return (CommentsAdapter) super.getListAdapter();
+        return mAdapter;
     }
 
     @Override
@@ -71,7 +76,13 @@ public class CommentsFragment extends SwipeRefreshListFragment
 
     @Override
     public void onLoadFinished(Loader<Comments> loader, Comments data) {
-        if (data != null) setListAdapter(new CommentsAdapter(getActivity(), data));
+        if (data != null) {
+            mAdapter = new CommentsAdapter(getActivity(), data);
+
+            AnimationAdapter animAdapter = new SwingBottomInAnimationAdapter(new AlphaInAnimationAdapter(mAdapter));
+            animAdapter.setAbsListView(getListView());
+            setListAdapter(animAdapter);
+        }
         setListShown(true);
         setRefreshing(false);
     }

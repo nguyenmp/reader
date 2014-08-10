@@ -13,6 +13,9 @@ import com.nguyenmp.reader.loaders.SubredditLinksLoader;
 import com.nguyenmp.reader.util.SwipeRefreshListFragment;
 import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
+import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.AlphaInAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 
 public class LinksListFragment extends SwipeRefreshListFragment
         implements Refreshable,
@@ -34,6 +37,7 @@ public class LinksListFragment extends SwipeRefreshListFragment
 
     private String mSubreddit;
     private Callback mCallback;
+    private LinksAdapter mAdapter;
 
     public static LinksListFragment newInstance() {
         return newInstance(null);
@@ -97,7 +101,13 @@ public class LinksListFragment extends SwipeRefreshListFragment
         getListView().setBackgroundColor(getResources().getColor(R.color.cards_background));
         getSwipeRefreshLayout().setBackgroundColor(getResources().getColor(R.color.cards_background));
         setEmptyText(getString(R.string.empty_subreddit));
-        setListAdapter(new LinksAdapter(getActivity(), this));
+        mAdapter = new LinksAdapter(getActivity(), this);
+
+        // Set up animation adapters
+        AnimationAdapter animationAdapter = new SwingBottomInAnimationAdapter(new AlphaInAnimationAdapter(mAdapter));
+        animationAdapter.setAbsListView(getListView());
+        setListAdapter(animationAdapter);
+
         setListShown(false);
         setRefreshing(true);
         if (savedInstanceState == null) refresh();
@@ -111,7 +121,7 @@ public class LinksListFragment extends SwipeRefreshListFragment
 
     @Override
     public LinksAdapter getListAdapter() {
-        return (LinksAdapter) super.getListAdapter();
+        return mAdapter;
     }
 
     @Override
