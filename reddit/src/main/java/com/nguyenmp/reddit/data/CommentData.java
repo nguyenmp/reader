@@ -6,7 +6,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import java.util.List;
 
 @JsonSerialize
-@JsonIgnoreProperties({"edited"})
+@JsonIgnoreProperties(value = {"edited"}, ignoreUnknown = true)
 public class CommentData {
     private String subreddit_id;
     private String banned_by;

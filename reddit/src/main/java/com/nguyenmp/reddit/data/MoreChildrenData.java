@@ -1,10 +1,12 @@
 package com.nguyenmp.reddit.data;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import java.util.List;
 
 @JsonSerialize
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MoreChildrenData {
     private int count;
     private String parent_id;

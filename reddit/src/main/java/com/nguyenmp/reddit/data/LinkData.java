@@ -4,7 +4,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.io.Serializable;
 
-@JsonIgnoreProperties("edited")
+@JsonIgnoreProperties(value = "edited", ignoreUnknown = true)
 public class LinkData implements Votable, Serializable {
     private String domain;
     private String banned_by;

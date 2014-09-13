@@ -8,7 +8,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 public abstract class Connection<ResultType> implements Runnable {
-    private static final String BASE_URL = "http://www.reddit.com/";
+    private static final String BASE_URL = "https://www.reddit.com/";
 
     @Override
     public void run() {

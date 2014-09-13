@@ -1,9 +1,11 @@
 package com.nguyenmp.reddit.data;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LoginData implements Serializable {
     @JsonProperty
     public String modhash, cookie;
