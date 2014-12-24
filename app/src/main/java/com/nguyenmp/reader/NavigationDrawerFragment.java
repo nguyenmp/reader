@@ -28,11 +28,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nguyenmp.reader.adapters.ChildAdapter;
 import com.nguyenmp.reader.data.Account;
 import com.nguyenmp.reader.db.AccountsDatabase;
+import com.nguyenmp.reader.util.SerialHelper;
+import com.nguyenmp.reddit.CookieSession;
+import com.nguyenmp.reddit.data.LoginData;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -107,7 +109,7 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
 
         // If we are logged in, clicking the username will shoot you to the profile
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        if (prefs.contains("username")) refresh();
+        if (getCurrentAccount(view.getContext()) != null) refresh();
 
         // If we are not logged in, clicking the username will prompt accounts
         else mCurrentAccountTextView.setOnClickListener(new ShowAccountsOnClickListener(getActivity(), currentAccountDropdownIndicator, accounts));
@@ -120,7 +122,7 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
                 selectItem(position);
             }
         });
-        mSubredditsListView.setAdapter(new ArrayAdapter<String>(
+        mSubredditsListView.setAdapter(new ArrayAdapter<>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_1,
                 android.R.id.text1,
@@ -286,6 +288,37 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
         if (mCurrentAccountTextView != null) mCurrentAccountTextView.setText(currentAccount);
     }
 
+    public static Account getCurrentAccount(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String username = prefs.getString("username", null);
+        String loginDataString = prefs.getString("login_data", null);
+
+        if (username != null && loginDataString != null) {
+            LoginData loginData = (LoginData) SerialHelper.fromString(loginDataString);
+            CookieSession cookieSession = new CookieSession(loginData);
+            return new Account(username, cookieSession);
+        } else {
+            return null;
+        }
+    }
+
+    public static void setCurrentAccount(Context context, Account account) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        // Null account means unset all account properties
+        if (account == null) {
+            prefs.edit()
+                    .remove("username")
+                    .remove("login_data")
+                    .apply();
+        } else {
+            prefs.edit()
+                    .putString("username", account.username)
+                    .putString("login_data", SerialHelper.toString(account.data))
+                    .apply();
+        }
+    }
+
     /** Shows a list of accounts/actions and animates the views */
     private static class ShowAccountsOnClickListener implements View.OnClickListener {
         private final FragmentActivity fragmentActivity;
@@ -344,22 +377,12 @@ public class NavigationDrawerFragment extends Fragment implements Refreshable {
             // If the item selected is in the list of accounts, use that
             if (position < accounts.length) {
                 Account account = accounts[position];
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                prefs.edit()
-                        .putString("username", account.username)
-                        .putString("cookie", account.data.cookie)
-                        .putString("modhash", account.data.modhash)
-                        .commit();
+                setCurrentAccount(context, account);
             }
 
             // Otherwise, it's either anonymous
             else if (position == accounts.length) {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                prefs.edit()
-                        .remove("username")
-                        .remove("cookie")
-                        .remove("modhash")
-                        .commit();
+                setCurrentAccount(context, null);
             }
 
             // Otherwise, it's a login attempt

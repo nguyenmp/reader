@@ -1,20 +1,22 @@
 package com.nguyenmp.reader.data;
 
 
-import com.nguyenmp.reddit.data.LoginData;
+import com.j256.ormlite.field.DatabaseField;
+import com.nguyenmp.reddit.CookieSession;
 
 public class Account {
+    @DatabaseField(id = true)
     public String username;
-    public LoginData data;
+    public CookieSession data;
 
-    public Account(String username, LoginData data) {
+    public Account(String username, CookieSession data) {
         this.username = username;
         this.data = data;
     }
 
     public Account(Account other) {
         this.username = other.username;
-        this.data = other.data == null ? null : other.data.clone();
+        this.data = other.data;
     }
 
     @Override

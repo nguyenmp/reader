@@ -2,7 +2,6 @@ package com.nguyenmp.reader.loaders;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
 
 import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
@@ -21,7 +20,11 @@ public class SubredditLinksLoader extends AsyncTaskLoader<SubredditLinkListing> 
     public SubredditLinkListing loadInBackground() {
         try {
             String after = mData == null ? null : mData.getData().getAfter();
-            return new SubredditLinkListingRunnable(mSubreddit, after).runBlockingMode();
+            return new SubredditLinkListingRunnable.Builder()
+                    .forSubreddit(mSubreddit)
+                    .after(after)
+                    .build()
+                    .call();
         } catch (Exception e) {
             return null;
         }

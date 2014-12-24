@@ -1,14 +1,12 @@
 package com.nguyenmp.reader;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -20,8 +18,8 @@ import android.widget.Toast;
 import com.nguyenmp.reader.data.Account;
 import com.nguyenmp.reader.db.AccountsDatabase;
 import com.nguyenmp.reader.util.DisplayHelper;
+import com.nguyenmp.reddit.CookieSession;
 import com.nguyenmp.reddit.Reddit;
-import com.nguyenmp.reddit.data.LoginData;
 
 public class LoginDialogFragment extends DialogFragment {
 
@@ -29,6 +27,7 @@ public class LoginDialogFragment extends DialogFragment {
         return new LoginDialogFragment();
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Initialize the dialog
@@ -118,7 +117,7 @@ public class LoginDialogFragment extends DialogFragment {
         @Override
         protected Account doInBackground(Void... params) {
             try {
-                LoginData data = Reddit.login(username, password);
+                CookieSession data = (CookieSession) Reddit.login(username, password);
                 if (isCancelled()) return null;
                 return new Account(username, data);
             } catch (Exception e) {
@@ -127,19 +126,13 @@ public class LoginDialogFragment extends DialogFragment {
             }
         }
 
-        @SuppressLint("CommitPrefEdits")
         @Override
         protected void onPostExecute(Account account) {
             fragment.enableFields();
             if (error != null) Toast.makeText(context, error,Toast.LENGTH_LONG).show();
             if (account == null) return;
             AccountsDatabase.put(context, account);
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            prefs.edit()
-                    .putString("username", account.username)
-                    .putString("cookie", account.data.cookie)
-                    .putString("modhash", account.data.modhash)
-                    .commit();
+            NavigationDrawerFragment.setCurrentAccount(context, account);
             fragment.dismiss();
             refreshListener.refresh();
         }
