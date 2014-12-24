@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,9 +43,10 @@ public class FrontpageActivity extends ActionBarActivity
                 fragmentManager.findFragmentById(R.id.navigation_drawer);
 
         // Set up the drawer.
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+                drawerLayout);
 
         final LinksListFragment listingFragment;
         if (savedInstanceState == null) {
@@ -51,6 +54,11 @@ public class FrontpageActivity extends ActionBarActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.links_list_container, listingFragment, FRAGMENT_TAG_SUBREDDIT_LISTING).commit();
         }
+
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        ActionBarDrawerToggle mDrawerToggle= new ActionBarDrawerToggle(this, drawerLayout, mToolbar, R.string.app_name, R.string.app_name);
+        drawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     @Override
