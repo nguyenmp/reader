@@ -46,31 +46,29 @@ public class AccountsDatabase extends OrmLiteSqliteOpenHelper {
 
     @NonNull
     public static Account[] get(@NonNull Context context) {
-        OrmHelper helper = null;
         try {
-            helper = OpenHelperManager.getHelper(context, OrmHelper.class);
+            OrmHelper helper = OpenHelperManager.getHelper(context, OrmHelper.class);
             Dao<Account, String> dao = helper.getDao();
             List<Account> accounts = dao.queryForAll();
             return accounts.toArray(new Account[accounts.size()]);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (helper != null) helper.close();
+            OpenHelperManager.releaseHelper();
         }
 
         return new Account[] {};
     }
 
     public static void put(Context context, Account account) {
-        OrmHelper helper = null;
         try {
-            helper = OpenHelperManager.getHelper(context, OrmHelper.class);
+            OrmHelper helper = OpenHelperManager.getHelper(context, OrmHelper.class);
             Dao<Account, String> dao = helper.getDao();
             dao.createOrUpdate(account);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (helper != null) helper.close();
+            OpenHelperManager.releaseHelper();
         }
     }
 }

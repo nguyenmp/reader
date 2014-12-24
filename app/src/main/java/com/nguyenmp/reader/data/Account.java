@@ -1,12 +1,15 @@
 package com.nguyenmp.reader.data;
 
 
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.nguyenmp.reddit.CookieSession;
 
 public class Account {
-    @DatabaseField(id = true)
+    @DatabaseField(id = true, dataType = DataType.STRING)
     public String username;
+
+    @DatabaseField(dataType = DataType.SERIALIZABLE)
     public CookieSession data;
 
     public Account() {
