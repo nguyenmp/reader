@@ -9,6 +9,10 @@ public class Account {
     public String username;
     public CookieSession data;
 
+    public Account() {
+        // For ORM Lite
+    }
+
     public Account(String username, CookieSession data) {
         this.username = username;
         this.data = data;
