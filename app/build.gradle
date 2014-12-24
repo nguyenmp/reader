@@ -25,6 +25,10 @@ android {
     }
     dexOptions {
         incremental true
+
+        // this line of code is necessary because predexing all our
+        // dependencies causes conflicts with android.support.v4
+        preDexLibraries = false
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
