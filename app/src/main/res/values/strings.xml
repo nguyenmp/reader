@@ -24,5 +24,6 @@
     <string name="thumbnail">Thumbnail</string>
     <string name="empty_subreddit">This Subreddit Is Empty</string>
     <string name="frontpage">Frontpage</string>
+    <string name="no_links_found">No Threads in this Subreddit :(</string>
 
 </resources>
