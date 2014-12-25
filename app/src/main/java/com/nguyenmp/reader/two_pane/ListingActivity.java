@@ -3,7 +3,6 @@ package com.nguyenmp.reader.two_pane;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -111,29 +110,13 @@ public abstract class ListingActivity<CollectionType> extends BaseActivity imple
     public void dispatchSetCollection(CollectionType data) {
         this.data = data;
 
-        FragmentManager fm = getSupportFragmentManager();
-
         // What I want to do is if the pager isn't visible, show it
         PagerFragment<CollectionType> pager = getPagerFragment();
-        if (pager == null) {
-            pager = getNewPagerFragment();
-            fm.beginTransaction()
-                    .setCustomAnimations(R.anim.frontpage_pager_show, 0, 0, R.anim.frontpage_pager_hide)
-                    .addToBackStack(null)
-                    .replace(R.id.comments_pager_container, pager, FRAGMENT_TAG_PAGER)
-                    .commit();
-
-            // If we need to create the pager, we also need to initialize the data
-            pager.setCollectionItem(position);
-        }
-
-        // Once we can ensure that the pager is created, we set it's position
-        pager.setCollection(data);
+        if (pager != null) pager.setCollection(data);
 
         // Do the same for the list
         ListFragment<CollectionType> list = getListFragment();
         if (list != null) list.setCollection(data);
-        // TODO: Have a fallback plan for when the list is null
     }
 
     @Override

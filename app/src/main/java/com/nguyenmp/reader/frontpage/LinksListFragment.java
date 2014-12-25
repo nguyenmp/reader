@@ -7,6 +7,7 @@ import android.widget.ListAdapter;
 
 import com.nguyenmp.reader.R;
 import com.nguyenmp.reader.two_pane.LoadableListFragment;
+import com.nguyenmp.reader.util.LoaderOfMore;
 import com.nguyenmp.reddit.data.Link;
 import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
 import com.nhaarman.listviewanimations.swinginadapters.prepared.AlphaInAnimationAdapter;
@@ -24,7 +25,7 @@ public class LinksListFragment extends LoadableListFragment<Link[]> {
     @NonNull
     @Override
     public ListAdapter getNewListAdapter(@NonNull Link[] collection) {
-        ImmutableLinksAdapter immutableLinksAdapter = new ImmutableLinksAdapter(collection, getActivity(), (ImmutableLinksAdapter.Callback) getActivity());
+        ImmutableLinksAdapter immutableLinksAdapter = new ImmutableLinksAdapter(collection, getActivity(), (LoaderOfMore) getActivity());
         AnimationAdapter animationAdapter = new SwingBottomInAnimationAdapter(new AlphaInAnimationAdapter(immutableLinksAdapter));
         animationAdapter.setAbsListView(getListView());
         return animationAdapter;

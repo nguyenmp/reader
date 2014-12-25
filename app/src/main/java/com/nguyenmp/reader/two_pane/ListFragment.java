@@ -54,11 +54,12 @@ public abstract class ListFragment<CollectionType> extends Fragment implements C
 
         // If data was already initialized (i.e. set at construction or
         // from previous state) create a new adapter to show that data
-        if (data != null) setCollection(data);
+        setCollection(data);
 
         // If the position was already initialized from construction
         // or previous state, set that as our position
         if (position != null) setCollectionItem(position);
+        else setCollectionItem(0);
 
         // Return the generated view
         return view;

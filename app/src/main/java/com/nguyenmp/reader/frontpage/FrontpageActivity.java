@@ -9,13 +9,21 @@ import com.nguyenmp.reader.loaders.SubredditLinksLoader;
 import com.nguyenmp.reader.two_pane.ListFragment;
 import com.nguyenmp.reader.two_pane.ListingActivity;
 import com.nguyenmp.reader.two_pane.PagerFragment;
+import com.nguyenmp.reader.util.LoaderOfMore;
 import com.nguyenmp.reddit.data.Link;
 import com.nguyenmp.reddit.data.SubredditLinkListing;
 
 public class FrontpageActivity extends ListingActivity<Link[]>
-        implements LoaderManager.LoaderCallbacks<SubredditLinkListing> {
+        implements LoaderManager.LoaderCallbacks<SubredditLinkListing>, LoaderOfMore {
 
     private static final int LOADER_ID = 0;
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+    }
 
     @NonNull
     @Override

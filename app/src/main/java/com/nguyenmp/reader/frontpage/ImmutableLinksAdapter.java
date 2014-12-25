@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.nguyenmp.reader.R;
+import com.nguyenmp.reader.util.LoaderOfMore;
 import com.nguyenmp.reddit.data.Link;
 
 public class ImmutableLinksAdapter extends BaseAdapter {
@@ -18,13 +19,13 @@ public class ImmutableLinksAdapter extends BaseAdapter {
 
     private final Link[] data;
     private final Context context;
-    private final Callback callback;
+    private final LoaderOfMore callback;
 
     public static interface Callback {
         public void loadMore();
     }
 
-    public ImmutableLinksAdapter(Link[] data, Context context, Callback callback) {
+    public ImmutableLinksAdapter(Link[] data, Context context, LoaderOfMore callback) {
         this.data = data;
         this.context = context;
         this.callback = callback;
@@ -82,13 +83,13 @@ public class ImmutableLinksAdapter extends BaseAdapter {
         subtitle.setText(link.getData().getSubreddit());
 
         if (link.getData().isIs_self()) {
-            TextView body = (TextView) view.findViewById(R.id.self_post_content);
-            String html = link.getData().getSelftext_html();
-//            html = StringEscapeUtils.unescapeHtml4(html);
-            html = html == null ? "" : html;
-            html = html.replace("<!-- SC_OFF -->", "");
-            html = html.replace("<!-- SC_ON -->", "");
-            body.setText(Html.fromHtml(html));
+//            TextView body = (TextView) view.findViewById(R.id.self_post_content);
+//            String html = link.getData().getSelftext_html();
+////            html = StringEscapeUtils.unescapeHtml4(html);
+//            html = html == null ? "" : html;
+//            html = html.replace("<!-- SC_OFF -->", "");
+//            html = html.replace("<!-- SC_ON -->", "");
+//            body.setText(Html.fromHtml(html));
         } else {
             // Link is an external link
 

@@ -18,8 +18,8 @@ public class BaseActivity extends ActionBarActivity{
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
 
