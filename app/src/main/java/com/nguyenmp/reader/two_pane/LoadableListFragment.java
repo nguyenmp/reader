@@ -13,10 +13,12 @@ import android.widget.ListView;
 
 import com.nguyenmp.reader.R;
 import com.nguyenmp.reader.util.ListFragmentSwipeRefreshLayout;
+import com.nguyenmp.reader.util.LoaderOfMore;
 
 public abstract class LoadableListFragment<CollectionType>
         extends ListFragment<CollectionType>
-        implements SwipeRefreshLayout.OnRefreshListener {
+        implements SwipeRefreshLayout.OnRefreshListener,
+        LoaderOfMore {
 
     private ListFragmentSwipeRefreshLayout refreshLayout;
 
@@ -43,6 +45,7 @@ public abstract class LoadableListFragment<CollectionType>
 
         // Sets color scheme resources
         refreshLayout.setColorSchemeResources(R.color.reddit_orange, R.color.ui_text, R.color.orangered, R.color.neutral);
+        setOnRefreshListener(this);
 
         // Now return the SwipeRefreshLayout as this fragment's content view
         return refreshLayout;
@@ -63,6 +66,7 @@ public abstract class LoadableListFragment<CollectionType>
         refreshLayout.setOnRefreshListener(listener);
     }
 
+    @Override
     public void loadMore() {
         ((CollectionManager) getActivity()).loadMore();
     }
@@ -82,9 +86,9 @@ public abstract class LoadableListFragment<CollectionType>
         private static final int THRESHOLD = 5;
 
         private final ListAdapter delegate;
-        private final LoadableListFragment fragment;
+        private final LoaderOfMore fragment;
 
-        private LoadMoreAdapter(ListAdapter delegate, LoadableListFragment fragment) {
+        private LoadMoreAdapter(ListAdapter delegate, LoaderOfMore fragment) {
             this.delegate = delegate;
             this.fragment = fragment;
         }
